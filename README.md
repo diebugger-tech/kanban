@@ -6,7 +6,6 @@
 ![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![NixOS Compatible](https://img.shields.io/badge/NixOS-Compatible-5277C3?style=for-the-badge&logo=nixos)
 
-![surbanai](./docs/screenshot.png)
 
 **surreal + kanban + ai — Zero-backend realtime Kanban board**
 
@@ -15,12 +14,20 @@
 ## 🚀 Features
 
 - **Realtime updates**: Powered by SurrealDB `LIVE SELECT` for instantaneous synchronization.
+- **Dark/Light Themes**: Switch between a terminal-style dark mode and a clean light mode.
 - **Terminal/hacker dark theme**: Sleek high-contrast UI using JetBrains Mono.
 - **Drag & Drop**: Fluid task movement between columns via native HTML5 API.
 - **Detail Panel**: Click any card to open a side panel with inline editing.
 - **Command Management**: Copy project START/STOP commands directly to your clipboard.
-- **Project Sync**: Automated tracking via `.project.toml` (v1.3 coming soon).
 - **NixOS Compatible**: Optimized for declarative development environments.
+
+## Screenshots
+
+### Dark Theme (Terminal)
+![surbanai dark theme](./docs/screenshot-dark.png)
+
+### Light Theme (Clean)
+![surbanai light theme](./docs/screenshot-light.png)
 
 ## ⚡ Quick Start
 

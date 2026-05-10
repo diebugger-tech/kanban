@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve surreal-board
+about: Create a report to help us improve surbanai
 title: '[BUG] '
 labels: bug
 assignees: ''

@@ -1,4 +1,4 @@
-# Contributing to Surreal Board
+# Contributing to Surbanai
 
 First off, thanks for taking the time to contribute! 🎉
 
