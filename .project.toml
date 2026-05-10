@@ -1,0 +1,9 @@
+[project]
+name = "surreal-board"
+stack = "React / SurrealDB / Vite"
+desc = "Realtime Kanban Board"
+icon = "📋"
+status = "in-progress"
+tags = ["#React", "#SurrealDB", "#OpenSource"]
+cmd_start = "make dev"
+cmd_stop = "make stop"
