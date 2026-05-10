@@ -153,6 +153,22 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
               </select>
             </div>
 
+            <div style={{
+              backgroundColor: 'rgba(255, 170, 0, 0.1)',
+              border: '1px solid #ffaa00',
+              padding: '0.8rem',
+              fontSize: '0.7rem',
+              color: '#ffaa00',
+              fontFamily: '"JetBrains Mono", monospace',
+              marginBottom: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.2rem'
+            }}>
+              <span>⚠️ WARNING: Commands are copied to clipboard only.</span>
+              <span style={{ opacity: 0.8 }}>Always verify before executing in terminal.</span>
+            </div>
+
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
               <button 
                 style={styles.actionBtn(copied === 'start' ? '#fff' : '#00ffaa')} 
@@ -170,15 +186,41 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
             
             <button style={styles.saveBtn} onClick={handleSave}>[ SAVE CHANGES ]</button>
 
-            <div style={styles.terminalBox}>
-              <div style={{ color: '#888', fontSize: '0.7rem', marginBottom: '0.5rem' }}>$ {data.name.toLowerCase()} --help</div>
-              <pre style={{ margin: 0, color: '#aaa', fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
-Available commands:
-{formData.cmd_start.padEnd(15)} Start project
-{formData.cmd_stop.padEnd(15)} Stop project
-make build      Build production
-make logs       View logs
+            <div style={{ 
+              marginTop: '1.5rem', 
+              backgroundColor: '#000', 
+              padding: '1.2rem', 
+              border: '1px solid #333', 
+              borderRadius: '4px',
+              boxShadow: 'inset 0 0 10px rgba(0, 255, 170, 0.05)'
+            }}>
+              <div style={{ color: '#888', fontSize: '0.7rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                <span style={{ color: '#00ffaa' }}>$</span> {data.name.toLowerCase()} --help
+              </div>
+              <pre style={{ 
+                margin: 0, 
+                color: '#888', 
+                fontSize: '0.75rem', 
+                whiteSpace: 'pre', 
+                lineHeight: '1.6',
+                fontFamily: '"JetBrains Mono", monospace'
+              }}>
+            <span style={{ color: '#00ffaa' }}>Available commands:</span>
+              {formData.cmd_start.padEnd(22)} <span style={{ color: '#666' }}>Start project</span>
+              {formData.cmd_stop.padEnd(22)} <span style={{ color: '#666' }}>Stop project</span>
+              {"make build".padEnd(22)} <span style={{ color: '#666' }}>Build for production</span>
+              {"make logs".padEnd(22)} <span style={{ color: '#666' }}>View application logs</span>
+
+            <span style={{ color: '#00ffaa' }}>Project Info:</span>
+              Stack:   <span style={{ color: '#e0e0e0' }}>{data.stack}</span>
+              Status:  <span style={{ color: '#e0e0e0' }}>{formData.status.toUpperCase()}</span>
+              Updated: <span style={{ color: '#e0e0e0' }}>{new Date(data.updated || Date.now()).toLocaleString()}</span>
+              <span style={{ display: 'inline-block', width: '8px', height: '14px', backgroundColor: '#00ffaa', verticalAlign: 'middle', marginLeft: '5px', animation: 'blink 1s step-end infinite' }}></span>
               </pre>
+              
+              <style>{`
+                @keyframes blink { 50% { opacity: 0; } }
+              `}</style>
             </div>
             <div style={{ fontSize: '0.7rem', color: '#666', textAlign: 'right', marginTop: '1rem' }}>
               LAST_UPDATE: {data.updated ? new Date(data.updated).toLocaleString() : 'N/A'}
