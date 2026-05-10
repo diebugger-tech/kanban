@@ -26,7 +26,7 @@ db-init: ## Initialisiert Demo-Daten in SurrealDB
 	@echo "📦 Lade Demo-Daten..."
 	surreal sql --endpoint ws://localhost:8000 \
 		--username root --password root \
-		--namespace myapp --database projects \
+		--namespace kanban --database projects \
 		--hide-welcome <<< "CREATE task:1 SET name='My Task', status='backlog', desc='Example task', tags=['#demo'], icon='📋', updated=time::now();"
 	@echo "✅ Demo-Daten geladen"
 
