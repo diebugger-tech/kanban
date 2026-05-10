@@ -1,4 +1,4 @@
-# AI Agent Constraints & Architecture (surreal-board)
+# AI Agent Constraints & Architecture (surbanai)
 
 > Global context and technical constraints for AI coding agents working on this repository.
 

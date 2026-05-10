@@ -1,5 +1,5 @@
 [project]
-name = "surreal-board"
+name = "surbanai"
 stack = "React / SurrealDB / Vite"
 desc = "Realtime Kanban Board"
 icon = "📋"

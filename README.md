@@ -1,4 +1,4 @@
-# surreal-board
+# surbanai
 
 ![SurrealDB](https://img.shields.io/badge/SurrealDB-2.x-ff00a0?style=for-the-badge&logo=surrealdb)
 ![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
@@ -6,7 +6,7 @@
 ![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![NixOS Compatible](https://img.shields.io/badge/NixOS-Compatible-5277C3?style=for-the-badge&logo=nixos)
 
-![surreal-board](./docs/screenshot.png)
+![surbanai](./docs/screenshot.png)
 
 **Zero-backend realtime Kanban board powered by SurrealDB WebSocket**
 
@@ -23,7 +23,7 @@
 ## ⚡ Quick Start
 
 ```bash
-git clone https://github.com/diebugger-tech/kanban
+git clone https://github.com/diebugger-tech/surbanai
 cd kanban
 cp .env.example .env
 # Edit .env with your SurrealDB credentials
