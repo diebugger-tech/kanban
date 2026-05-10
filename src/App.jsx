@@ -33,8 +33,8 @@ export default function App() {
     <div style={{ minHeight: '100vh', padding: '2rem' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
         <div>
-          <h1 style={{ color: 'var(--accent-green)', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>SURREAL_BOARD</h1>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>v1.2.0 // REFACTOR_COMPLETE</div>
+          <h1 style={{ color: 'var(--accent-green)', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>SURBANAI</h1>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>sur·ban·ai = surreal + kanban + ai</div>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 
@@ -72,7 +72,7 @@ export default function App() {
         ))}
       </main>
 
-      <footer style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.7rem', textAlign: 'center' }}>© 2026 ANDREAS BADER // TERMINAL_UI</footer>
+      <footer style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.7rem', textAlign: 'center' }}>© 2026 ANDREAS BADER // sur·ban·ai = surreal + kanban + ai // TERMINAL_UI</footer>
       <DetailPanel projectId={selectedProject} isOpen={!!selectedProject} onClose={() => setSelectedProject(null)} />
     </div>
   );
