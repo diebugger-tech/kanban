@@ -1,0 +1,4 @@
+#V2
+SELECT * FROM projekt;
+CREATE task:1 SET name='My Task', status='backlog', desc='Example task', tags=['#demo'], icon='📋', updated=time::now();
+DELETE projekt;
