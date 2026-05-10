@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-05-10
+### Changed
+- Renamed project from surreal-board to surbanai
+- surbanai = surreal + kanban + ai
+
 ## [1.1.0] - 2026-05-10
 - DetailPanel mit Inline-Editing
 - Copy-to-clipboard Commands
@@ -13,3 +18,4 @@ All notable changes to this project will be documented in this file.
 - SurrealDB Realtime Backend
 - Drag & Drop Kanban
 - Terminal Dark Theme
+
