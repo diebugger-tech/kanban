@@ -59,6 +59,20 @@ input, textarea, select {
   font-family: inherit;
 }
 
+/* SURBANAI LOGO STYLING */
+.logo-text {
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.logo-text .sur { color: var(--accent-green); transition: color 0.3s ease; }
+.logo-text .ban { color: var(--accent-green); transition: color 0.3s ease; }
+.logo-text .ai { color: var(--accent-green); transition: color 0.3s ease; }
+
+.logo-text:hover .sur { color: #ff00a0; text-shadow: 0 0 8px rgba(255, 0, 160, 0.4); }
+.logo-text:hover .ban { color: #61dafb; text-shadow: 0 0 8px rgba(97, 218, 251, 0.4); }
+.logo-text:hover .ai { color: #ffcc00; text-shadow: 0 0 8px rgba(255, 204, 0, 0.4); }
+
 @keyframes blink {
   50% { opacity: 0; }
 }
