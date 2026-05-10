@@ -2,3 +2,21 @@
 SELECT * FROM projekt;
 CREATE task:1 SET name='My Task', status='backlog', desc='Example task', tags=['#demo'], icon='📋', updated=time::now();
 DELETE projekt;
+SELECT id, name FROM projekt
+UPDATE projekt:3dnterminal SET name='3DNTerminal', stack='Rust / Bevy / Wayland', desc='3D Terminal für Cosmic Desktop', icon='🖥️', status='in-progress', cmd_start='3dn', cmd_stop='pkill -f cargo', updated=time::now();
+UPDATE projekt:cabellistpro SET name='CabellistPro', stack='FastAPI / Python / MySQL', desc='B2B SaaS Kabelmanagement & HV-Testing', icon='🚀', status='done', cmd_start='make start', cmd_stop='make stop', updated=time::now();
+UPDATE projekt:guterprompt SET name='GuterPrompt', stack='PHP 8.3 / SvelteKit / Flarum', desc='Community Prompt-Bewertungsmodell', icon='📝', status='in-progress', cmd_start='diebugger', cmd_stop='pkill -f npm', updated=time::now();
+UPDATE projekt:pflanternen SET name='Pflanternen', stack='Bash / SurrealDB / NixOS', desc='NixOS KI-Automatisierung Framework', icon='🌿', status='in-progress', cmd_start='~/Projekte/aktiv/Pflanternen/bin/diagnose.sh', cmd_stop='', updated=time::now();
+UPDATE projekt:surrealboard SET name='surreal-board', stack='React / SurrealDB / Vite', desc='Realtime Kanban Board', icon='📋', status='in-progress', cmd_start='make dev', cmd_stop='make stop', updated=time::now();
+UPDATE projekt:cabellistpro SET cmd_start = 'make start', cmd_stop = 'make stop'; UPDATE projekt:guterprompt SET cmd_start = 'diebugger', cmd_stop = 'make stop'; UPDATE projekt:terminal SET cmd_start = '3dn', cmd_stop = 'pkill -f cargo'; UPDATE projekt:pflanternen SET cmd_start = '~/Projekte/aktiv/Pflanternen/bin/diagnose.sh', cmd_stop = 'none'; UPDATE projekt:agentsystem SET cmd_start = 'agent', cmd_stop = 'exit'; UPDATE projekt:nixos_ki_os SET cmd_start = 'nix-up', cmd_stop = 'none';
+UPDATE projekt:terminal SET name='3DNTerminal', stack='Rust / Bevy / Wayland', desc='3D Terminal für Cosmic Desktop', icon='🖥️', status='in-progress', cmd_start='3dn', cmd_stop='pkill -f cargo', updated=time::now();
+UPDATE projekt:cabellistpro SET name='CabellistPro', stack='FastAPI / Python / MySQL', desc='B2B SaaS Kabelmanagement & HV-Testing', icon='🚀', status='done', cmd_start='make start', cmd_stop='make stop', updated=time::now();
+UPDATE projekt:guterprompt SET name='GuterPrompt', stack='PHP 8.3 / SvelteKit / Flarum', desc='Community Prompt-Bewertungsmodell', icon='📝', status='in-progress', cmd_start='diebugger', cmd_stop='pkill -f npm', updated=time::now();
+UPDATE projekt:pflanternen SET name='Pflanternen', stack='Bash / SurrealDB / NixOS', desc='NixOS KI-Automatisierung Framework', icon='🌿', status='in-progress', cmd_start='~/Projekte/aktiv/Pflanternen/bin/diagnose.sh', cmd_stop='', updated=time::now();
+UPDATE projekt:surrealboard SET name='surreal-board', stack='React / SurrealDB / Vite', desc='Realtime Kanban Board', icon='📋', status='in-progress', cmd_start='make dev', cmd_stop='make stop', updated=time::now();
+CREATE projekt:surrealboard SET name='surreal-board', stack='React / SurrealDB / Vite', desc='Realtime Kanban Board', icon='📋', status='in-progress', tags=['#React','#SurrealDB','#OpenSource'], cmd_start='make dev', cmd_stop='make stop', updated=time::now();
+UPDATE projekt:terminal SET name='3DNTerminal', stack='Rust / Bevy / Wayland', desc='3D Terminal für Cosmic Desktop', icon='🖥️', status='in-progress', cmd_start='3dn', cmd_stop='pkill -f cargo', updated=time::now();
+UPDATE projekt:cabellistpro SET name='CabellistPro', stack='FastAPI / Python / MySQL', desc='B2B SaaS Kabelmanagement & HV-Testing', icon='🚀', status='done', cmd_start='make start', cmd_stop='make stop', updated=time::now();
+UPDATE projekt:guterprompt SET name='GuterPrompt', stack='PHP 8.3 / SvelteKit / Flarum', desc='Community Prompt-Bewertungsmodell', icon='📝', status='in-progress', cmd_start='diebugger', cmd_stop='pkill -f npm', updated=time::now();
+UPDATE projekt:pflanternen SET name='Pflanternen', stack='Bash / SurrealDB / NixOS', desc='NixOS KI-Automatisierung Framework', icon='🌿', status='in-progress', cmd_start='~/Projekte/aktiv/Pflanternen/bin/diagnose.sh', cmd_stop='', updated=time::now();
+UPDATE projekt:surrealboard SET name='surreal-board', stack='React / SurrealDB / Vite', desc='Realtime Kanban Board', icon='📋', status='in-progress', cmd_start='make dev', cmd_stop='make stop', updated=time::now();
