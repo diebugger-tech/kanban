@@ -1,57 +1,46 @@
-# 🚀 Surreal Board
+# surreal-board
 
-> A Realtime Kanban Board built with React, Vite, and SurrealDB 2.3.10 featuring a pure Terminal Aesthetic.
+![SurrealDB](https://img.shields.io/badge/SurrealDB-2.x-ff00a0?style=for-the-badge&logo=surrealdb)
+![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
+![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite)
+![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![NixOS Compatible](https://img.shields.io/badge/NixOS-Compatible-5277C3?style=for-the-badge&logo=nixos)
 
-![Terminal Kanban Dashboard](https://via.placeholder.com/800x400.png?text=Terminal+Kanban+Dashboard)
+![surreal-board](./docs/screenshot.png)
 
-## ⚡ Features
-- **Realtime Sync**: Native WebSockets and Live Queries via SurrealDB 2.x SDK.
-- **Terminal Aesthetic**: Dark mode, JetBrains Mono, high contrast design.
-- **Native HTML5 Drag & Drop**: Smooth column management.
-- **Slide-in Detail Panel**: Quick edit descriptions, tags, and status.
-- **NixOS Compatible**: Fully reproducible environments.
+**Zero-backend realtime Kanban board powered by SurrealDB WebSocket**
 
-## 🛠 Database Management
-We recommend **Surrealist** for managing your SurrealDB data visually.
-* **[Surrealist (Official GUI)](https://surrealist.app)** (or https://app.surrealdb.com)
-  * Query Playground
-  * Record Explorer
-  * Schema Designer
-  * *Connect to `ws://localhost:8000` with `root/root`*
-* **surreal SQL CLI**: For fast queries directly in your terminal.
+## 🚀 Features
 
-## 🚀 Quick Start
+- **Realtime updates**: Powered by SurrealDB `LIVE SELECT` for instantaneous synchronization.
+- **Terminal/hacker dark theme**: Sleek high-contrast UI using JetBrains Mono.
+- **Drag & Drop**: Fluid task movement between columns via native HTML5 API.
+- **Detail Panel**: Click any card to open a side panel with inline editing.
+- **Command Management**: Copy project START/STOP commands directly to your clipboard.
+- **Project Sync**: Automated tracking via `.project.toml` (v1.3 coming soon).
+- **NixOS Compatible**: Optimized for declarative development environments.
 
-1. **Clone & Install**
-   ```bash
-   git clone https://github.com/yourusername/surreal-board.git
-   cd surreal-board
-   npm install
-   ```
+## ⚡ Quick Start
 
-2. **Environment Setup**
-   Copy the example environment file and adjust if necessary:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. **Start the Database & App**
-   ```bash
-   make dev
-   ```
-
-## ⌨️ Makefile Commands (`make help`)
-```text
-Available commands:
-make dev      Start development server and database
-make stop     Stop all related containers
-make build    Build for production
-make logs     View application logs
-make help     Show this help message
+```bash
+git clone https://github.com/diebugger-tech/kanban
+cd kanban
+cp .env.example .env
+# Edit .env with your SurrealDB credentials
+npm install && npm run dev
 ```
 
-## 🤝 Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+## 🛠 Management
 
-## 📝 License
-MIT License © 2026 Andreas Bader. See [LICENSE](LICENSE) for details.
+### Makefile
+Run `make help` to see all available automation tasks.
+
+### Database
+For visual database management, we recommend using [Surrealist](https://surrealist.app).
+
+## 📖 Branching & Setup
+- **main branch**: Generic, community-ready version for general use.
+- **personal setup branch**: Tailored for specific NixOS configurations (see [AGENTS.md](./AGENTS.md)).
+
+## 🤝 Contributing
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
