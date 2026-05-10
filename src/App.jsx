@@ -28,10 +28,10 @@ export default function App() {
       try {
         setDbError(null);
         // Connect to SurrealDB (SDK v2.x style)
-        await db.connect('ws://127.0.0.1:8000/rpc', {
-          namespace: 'pflanternen',
-          database: 'projekte',
-          authentication: { username: 'root', password: 'root' }
+        await db.connect(import.meta.env.VITE_SURREAL_URL, {
+          namespace: import.meta.env.VITE_SURREAL_NS,
+          database: import.meta.env.VITE_SURREAL_DB,
+          authentication: { username: import.meta.env.VITE_SURREAL_USER, password: import.meta.env.VITE_SURREAL_PASS }
         });
         setDbStatus('ONLINE');
 
