@@ -8,7 +8,9 @@
 
 ![surbanai](./docs/screenshot.png)
 
-**Zero-backend realtime Kanban board powered by SurrealDB WebSocket**
+**surreal + kanban + ai — Zero-backend realtime Kanban board**
+
+> **surbanai** = **sur**real + kan**ban** + **ai**
 
 ## 🚀 Features
 
@@ -24,11 +26,16 @@
 
 ```bash
 git clone https://github.com/diebugger-tech/surbanai
-cd kanban
+cd surbanai
 cp .env.example .env
 # Edit .env with your SurrealDB credentials
 npm install && npm run dev
 ```
+
+## Integrations (coming soon)
+- **Obsidian** — sync vault notes and #todo tags to board cards
+- **Hermes** — bidirectional AI agent task sync
+- **Pflanternen** — NixOS automation diagnostics as cards
 
 ## 🛠 Management
 
