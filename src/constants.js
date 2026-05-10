@@ -1,5 +1,5 @@
 export const COLUMNS = [
-  { id: 'backlog', title: 'BACKLOG', color: '#00aaff' },
-  { id: 'in-progress', title: 'IN PROGRESS', color: '#ffaa00' },
-  { id: 'done', title: 'DONE', color: '#00ffaa' }
+  { id: 'backlog', title: 'BACKLOG', color: 'var(--accent-blue)' },
+  { id: 'in-progress', title: 'IN PROGRESS', color: 'var(--accent-orange)' },
+  { id: 'done', title: 'DONE', color: 'var(--accent-green)' }
 ];
