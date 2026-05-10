@@ -62,49 +62,49 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
   const styles = {
     overlay: {
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)', zIndex: 999
+      backgroundColor: 'var(--bg-overlay)', backdropFilter: 'blur(2px)', zIndex: 999
     },
     panel: {
       position: 'fixed', top: 0, right: 0, bottom: 0, width: '450px',
-      backgroundColor: '#0a0a0b', borderLeft: '2px solid #333', zIndex: 1000,
+      backgroundColor: 'var(--bg-primary)', borderLeft: '2px solid var(--border)', zIndex: 1000,
       display: 'flex', flexDirection: 'column', padding: '2rem',
       transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-      transition: 'transform 0.3s ease-out', boxShadow: '-5px 0 20px rgba(0,0,0,0.5)',
+      transition: 'transform 0.3s ease-out', boxShadow: '-5px 0 20px var(--shadow)',
       overflowY: 'auto'
     },
     closeBtn: {
       position: 'absolute', top: '1rem', right: '1rem',
-      background: 'transparent', border: 'none', color: '#ff4444',
+      background: 'transparent', border: 'none', color: 'var(--error)',
       fontSize: '1.2rem', cursor: 'pointer', fontFamily: 'monospace'
     },
     content: {
       display: 'flex', flexDirection: 'column', gap: '1.5rem',
-      fontFamily: '"JetBrains Mono", monospace', color: '#e0e0e0'
+      color: 'var(--text-primary)'
     },
-    label: (color = '#00ffaa') => ({
+    label: (color = 'var(--accent-green)') => ({
       color: color, fontSize: '0.8rem'
     }),
     input: {
-      backgroundColor: '#16161a', color: '#e0e0e0', border: '1px solid #333',
+      backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)',
       padding: '0.5rem', fontFamily: 'inherit'
     },
     textarea: {
-      backgroundColor: '#16161a', color: '#e0e0e0', border: '1px solid #333',
+      backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)',
       padding: '0.5rem', minHeight: '80px', fontFamily: 'inherit', resize: 'vertical'
     },
     actionBtn: (bgColor) => ({
-      flex: 1, backgroundColor: bgColor, color: '#000', border: 'none',
+      flex: 1, backgroundColor: bgColor, color: 'var(--bg-primary)', border: 'none',
       padding: '0.6rem', fontWeight: 'bold', cursor: 'pointer',
       fontFamily: 'inherit', transition: 'all 0.2s'
     }),
     saveBtn: {
-      backgroundColor: '#00aaff', color: '#000', border: 'none',
+      backgroundColor: 'var(--accent-blue)', color: 'var(--bg-primary)', border: 'none',
       padding: '0.8rem', fontWeight: 'bold', cursor: 'pointer',
       fontFamily: 'inherit'
     },
     terminalBox: {
-      marginTop: '1rem', backgroundColor: '#000', padding: '1rem',
-      border: '1px solid #333', borderRadius: '4px'
+      marginTop: '1rem', backgroundColor: 'var(--bg-primary)', padding: '1rem',
+      border: '1px solid var(--border)', borderRadius: '4px'
     }
   };
 
@@ -115,14 +115,14 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
         <button onClick={onClose} style={styles.closeBtn}>[X]</button>
         
         {loading || !data ? (
-          <div style={{ color: '#00ffaa' }}>&gt; LOADING DATA...</div>
+          <div style={{ color: 'var(--accent-green)' }}>&gt; LOADING DATA...</div>
         ) : (
           <div style={styles.content}>
-            <div style={{ borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
+            <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{data.icon}</div>
-              <h2 style={{ margin: 0, color: '#00ffaa', letterSpacing: '1px' }}>{data.name}</h2>
-              <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.5rem' }}>ID: {data.id.toString()}</div>
-              <div style={{ color: '#888', fontSize: '0.8rem' }}>STACK: {data.stack}</div>
+              <h2 style={{ margin: 0, color: 'var(--accent-green)', letterSpacing: '1px' }}>{data.name}</h2>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.5rem' }}>ID: {data.id.toString()}</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>STACK: {data.stack}</div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -141,7 +141,7 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
                 <input type="text" value={formData.cmd_start} onChange={e => setFormData({ ...formData, cmd_start: e.target.value })} style={styles.input} />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label style={styles.label('#ff4444')}>&gt; STOP CMD</label>
+                <label style={styles.label('var(--error)')}>&gt; STOP CMD</label>
                 <input type="text" value={formData.cmd_stop} onChange={e => setFormData({ ...formData, cmd_stop: e.target.value })} style={styles.input} />
               </div>
             </div>
@@ -155,11 +155,11 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
 
             <div style={{
               backgroundColor: 'rgba(255, 170, 0, 0.1)',
-              border: '1px solid #ffaa00',
+              border: '1px solid var(--accent-orange)',
               padding: '0.8rem',
               fontSize: '0.7rem',
-              color: '#ffaa00',
-              fontFamily: '"JetBrains Mono", monospace',
+              color: 'var(--accent-orange)',
+              fontFamily: 'inherit',
               marginBottom: '1rem',
               display: 'flex',
               flexDirection: 'column',
@@ -171,13 +171,13 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
               <button 
-                style={styles.actionBtn(copied === 'start' ? '#fff' : '#00ffaa')} 
+                style={styles.actionBtn(copied === 'start' ? 'var(--text-primary)' : 'var(--accent-green)')} 
                 onClick={() => copyToClipboard(formData.cmd_start, 'start')}
               >
                 {copied === 'start' ? '[ COPIED! ]' : `[ START (${formData.cmd_start}) ]`}
               </button>
               <button 
-                style={styles.actionBtn(copied === 'stop' ? '#fff' : '#ff4444')} 
+                style={styles.actionBtn(copied === 'stop' ? 'var(--text-primary)' : 'var(--error)')} 
                 onClick={() => copyToClipboard(formData.cmd_stop, 'stop')}
               >
                 {copied === 'stop' ? '[ COPIED! ]' : `[ STOP (${formData.cmd_stop}) ]`}
@@ -188,41 +188,41 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
 
             <div style={{ 
               marginTop: '1.5rem', 
-              backgroundColor: '#000', 
+              backgroundColor: 'var(--bg-secondary)', 
               padding: '1.2rem', 
-              border: '1px solid #333', 
+              border: '1px solid var(--border)', 
               borderRadius: '4px',
-              boxShadow: 'inset 0 0 10px rgba(0, 255, 170, 0.05)'
+              boxShadow: 'inset 0 0 10px var(--shadow)'
             }}>
-              <div style={{ color: '#888', fontSize: '0.7rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-                <span style={{ color: '#00ffaa' }}>$</span> {data.name.toLowerCase()} --help
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                <span style={{ color: 'var(--accent-green)' }}>$</span> {data.name.toLowerCase()} --help
               </div>
               <pre style={{ 
                 margin: 0, 
-                color: '#888', 
+                color: 'var(--text-secondary)', 
                 fontSize: '0.75rem', 
                 whiteSpace: 'pre', 
                 lineHeight: '1.6',
-                fontFamily: '"JetBrains Mono", monospace'
+                fontFamily: 'inherit'
               }}>
-            <span style={{ color: '#00ffaa' }}>Available commands:</span>
-              {formData.cmd_start.padEnd(22)} <span style={{ color: '#666' }}>Start project</span>
-              {formData.cmd_stop.padEnd(22)} <span style={{ color: '#666' }}>Stop project</span>
-              {"make build".padEnd(22)} <span style={{ color: '#666' }}>Build for production</span>
-              {"make logs".padEnd(22)} <span style={{ color: '#666' }}>View application logs</span>
+            <span style={{ color: 'var(--accent-green)' }}>Available commands:</span>
+              {formData.cmd_start.padEnd(22)} <span style={{ color: 'var(--text-muted)' }}>Start project</span>
+              {formData.cmd_stop.padEnd(22)} <span style={{ color: 'var(--text-muted)' }}>Stop project</span>
+              {"make build".padEnd(22)} <span style={{ color: 'var(--text-muted)' }}>Build for production</span>
+              {"make logs".padEnd(22)} <span style={{ color: 'var(--text-muted)' }}>View application logs</span>
 
-            <span style={{ color: '#00ffaa' }}>Project Info:</span>
-              Stack:   <span style={{ color: '#e0e0e0' }}>{data.stack}</span>
-              Status:  <span style={{ color: '#e0e0e0' }}>{formData.status.toUpperCase()}</span>
-              Updated: <span style={{ color: '#e0e0e0' }}>{new Date(data.updated || Date.now()).toLocaleString()}</span>
-              <span style={{ display: 'inline-block', width: '8px', height: '14px', backgroundColor: '#00ffaa', verticalAlign: 'middle', marginLeft: '5px', animation: 'blink 1s step-end infinite' }}></span>
+            <span style={{ color: 'var(--accent-green)' }}>Project Info:</span>
+              Stack:   <span style={{ color: 'var(--text-primary)' }}>{data.stack}</span>
+              Status:  <span style={{ color: 'var(--text-primary)' }}>{formData.status.toUpperCase()}</span>
+              Updated: <span style={{ color: 'var(--text-primary)' }}>{new Date(data.updated || Date.now()).toLocaleString()}</span>
+              <span style={{ display: 'inline-block', width: '8px', height: '14px', backgroundColor: 'var(--accent-green)', verticalAlign: 'middle', marginLeft: '5px', animation: 'blink 1s step-end infinite' }}></span>
               </pre>
               
               <style>{`
                 @keyframes blink { 50% { opacity: 0; } }
               `}</style>
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#666', textAlign: 'right', marginTop: '1rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'right', marginTop: '1rem' }}>
               LAST_UPDATE: {data.updated ? new Date(data.updated).toLocaleString() : 'N/A'}
             </div>
           </div>

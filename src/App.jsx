@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSurrealDB } from './hooks/useSurrealDB';
 import { COLUMNS } from './constants';
 import db from './lib/db';
@@ -8,6 +8,14 @@ import DetailPanel from './components/DetailPanel';
 export default function App() {
   const { projects, dbStatus, dbError } = useSurrealDB();
   const [selectedProject, setSelectedProject] = useState(null);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.body.className = theme === 'light' ? 'light-theme' : '';
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const handleDragStart = (e, id) => e.dataTransfer.setData('text/plain', id);
   const handleDragOver = (e) => e.preventDefault();
@@ -22,18 +30,32 @@ export default function App() {
   };
 
   return (
-    <div style={{ backgroundColor: '#0a0a0b', minHeight: '100vh', color: '#e0e0e0', padding: '2rem', fontFamily: '"JetBrains Mono", monospace' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
+    <div style={{ minHeight: '100vh', padding: '2rem' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
         <div>
-          <h1 style={{ color: '#00ffaa', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>SURREAL_BOARD</h1>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.4rem' }}>v1.2.0 // REFACTOR_COMPLETE</div>
+          <h1 style={{ color: 'var(--accent-green)', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>SURREAL_BOARD</h1>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>v1.2.0 // REFACTOR_COMPLETE</div>
         </div>
-        <div style={{ padding: '0.5rem 1rem', border: '1px solid #333', color: dbStatus === 'ONLINE' ? '#00ffaa' : '#ff4444', fontSize: '0.8rem' }}>
-          DB_STATUS: [{dbStatus}]
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button 
+            onClick={toggleTheme}
+            style={{ 
+              padding: '0.5rem 1rem', 
+              backgroundColor: 'var(--bg-secondary)', 
+              color: 'var(--text-primary)', 
+              border: '1px solid var(--border)', 
+              fontSize: '0.8rem' 
+            }}
+          >
+            THEME: [{theme.toUpperCase()}]
+          </button>
+          <div style={{ padding: '0.5rem 1rem', border: '1px solid var(--border)', color: dbStatus === 'ONLINE' ? 'var(--accent-green)' : 'var(--error)', fontSize: '0.8rem' }}>
+            DB_STATUS: [{dbStatus}]
+          </div>
         </div>
       </header>
 
-      {dbError && <div style={{ backgroundColor: '#441111', color: '#ffaaaa', padding: '1rem', border: '1px solid #ff4444', marginBottom: '2rem' }}>Error: {dbError}</div>}
+      {dbError && <div style={{ backgroundColor: 'rgba(255, 68, 68, 0.1)', color: 'var(--error)', padding: '1rem', border: '1px solid var(--error)', marginBottom: '2rem' }}>Error: {dbError}</div>}
 
       <main style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
         {COLUMNS.map(col => (
@@ -50,7 +72,7 @@ export default function App() {
         ))}
       </main>
 
-      <footer style={{ marginTop: '4rem', color: '#444', fontSize: '0.7rem', textAlign: 'center' }}>© 2026 ANDREAS BADER // TERMINAL_UI</footer>
+      <footer style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.7rem', textAlign: 'center' }}>© 2026 ANDREAS BADER // TERMINAL_UI</footer>
       <DetailPanel projectId={selectedProject} isOpen={!!selectedProject} onClose={() => setSelectedProject(null)} />
     </div>
   );

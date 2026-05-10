@@ -3,14 +3,14 @@ import React from 'react';
 export default function KanbanCard({ project, onDragStart, onDragEnd, onClick }) {
   const styles = {
     card: {
-      backgroundColor: '#16161a',
-      border: '1px solid #333',
+      backgroundColor: 'var(--bg-secondary)',
+      border: '1px solid var(--border)',
       borderRadius: '4px',
       padding: '1rem',
       marginBottom: '1rem',
       cursor: 'grab',
       transition: 'all 0.2s ease',
-      borderLeft: '4px solid #00ffaa'
+      borderLeft: '4px solid var(--accent-green)'
     },
     cardHeader: {
       display: 'flex',
@@ -24,18 +24,18 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick })
     cardTitle: {
       fontSize: '0.9rem',
       fontWeight: 'bold',
-      color: '#00ffaa',
+      color: 'var(--accent-green)',
       margin: 0
     },
     stack: {
       fontSize: '0.7rem',
-      color: '#888',
+      color: 'var(--text-muted)',
       marginBottom: '0.8rem',
       fontStyle: 'italic'
     },
     desc: {
       fontSize: '0.75rem',
-      color: '#aaa',
+      color: 'var(--text-secondary)',
       lineHeight: '1.4',
       marginBottom: '1rem'
     },
@@ -46,11 +46,11 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick })
     },
     tag: {
       fontSize: '0.65rem',
-      backgroundColor: '#222',
-      color: '#00ffaa',
+      backgroundColor: 'var(--bg-tertiary)',
+      color: 'var(--accent-green)',
       padding: '2px 6px',
       borderRadius: '2px',
-      border: '1px solid #333'
+      border: '1px solid var(--border)'
     }
   };
 
@@ -61,8 +61,8 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick })
       onDragStart={(e) => onDragStart(e, project.id)}
       onDragEnd={onDragEnd}
       onClick={() => onClick(project.id)}
-      onMouseEnter={(e) => e.currentTarget.style.borderColor = '#00ffaa'}
-      onMouseLeave={(e) => e.currentTarget.style.borderColor = '#333'}
+      onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-green)'}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
     >
       <div style={styles.cardHeader}>
         <span style={styles.icon}>{project.icon || '📦'}</span>

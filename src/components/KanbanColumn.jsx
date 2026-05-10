@@ -4,8 +4,8 @@ import KanbanCard from './KanbanCard';
 export default function KanbanColumn({ column, projects, onDragStart, onDragEnd, onDragOver, onDrop, onCardClick }) {
   const styles = {
     column: {
-      backgroundColor: 'rgba(22, 22, 26, 0.5)',
-      border: '1px solid #333',
+      backgroundColor: 'var(--bg-secondary)',
+      border: '1px solid var(--border)',
       borderRadius: '4px',
       padding: '1rem',
       minHeight: '600px',
@@ -22,11 +22,11 @@ export default function KanbanColumn({ column, projects, onDragStart, onDragEnd,
     },
     count: {
       fontSize: '0.7rem',
-      color: '#666',
-      backgroundColor: '#000',
+      color: 'var(--text-muted)',
+      backgroundColor: 'var(--bg-primary)',
       padding: '2px 6px',
       borderRadius: '10px',
-      border: '1px solid #333'
+      border: '1px solid var(--border)'
     }
   };
 
