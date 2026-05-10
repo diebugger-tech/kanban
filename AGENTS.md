@@ -1,22 +1,21 @@
 # AI Agent Constraints & Architecture (surreal-board)
 
-> Global context file for AI coding agents working on this repository.
+> Global context and technical constraints for AI coding agents working on this repository.
 
-## Stack & Constraints
-- **Frontend**: React 18, Vite.
-- **Backend/DB**: SurrealDB 2.3.10 (WebSocket).
-- **Styling**: Terminal Aesthetic (Dark mode, `#00ffaa` accents, JetBrains Mono).
-- **Rule**: Single-File Rule. One file per commit.
-- **Rule**: NEVER change existing migration files.
+## 🏗 Project Structure
+- `src/components/`: Modular UI components (Columns, Cards, DetailPanel).
+- `src/lib/db.js`: Centralized SurrealDB connection logic (Singleton).
+- `src/hooks/`: Custom React hooks for data fetching and live updates.
+- `src/App.jsx`: Main application orchestration.
 
-## Key Files
-- `src/App.jsx`: Main Kanban application logic and UI.
-- `src/index.css`: Global styles.
-- `Makefile`: Commands for dev, stop, logs.
-- `db_init.sh`: SurrealDB initialization script.
+## 🤖 Critical Rules for Agents
+1. **db.js is Singleton**: Do NOT initialize multiple connections. Use the shared instance.
+2. **Environment Variables**: Access all configuration via `import.meta.env.VITE_*`.
+3. **LIVE SELECT**: Always use Live Queries for real-time data synchronization.
+4. **No Backend**: All logic is handled via frontend and SurrealDB. No custom API middleware.
+5. **NixOS Compatibility**: All shell scripts must use `#!/usr/bin/env bash`.
+6. **Code Style**: Functional React 18 components with Runes-like clarity (hooks).
 
-## Coding Conventions
-- **SurrealDB SDK v2.x**: Always use the `authentication` object for credentials (not `auth`), and `namespace`/`database` options in `db.connect()`.
-- Use async/await for all DB calls.
-- Stick to React hooks (`useState`, `useEffect`, `useRef`).
-- Maintain the high-contrast terminal UI — avoid over-engineering the CSS.
+## 🔧 Verification
+- Verify changes using `npm run dev`.
+- Ensure new features adhere to the terminal dark theme aesthetic.
