@@ -33,3 +33,4 @@ npm-debug.log*
 knowledge/
 __pycache__/
 *.pyc
+awesome-surreal/
