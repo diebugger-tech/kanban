@@ -1,16 +1,57 @@
-# React + Vite
+# 🚀 Surreal Board
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A Realtime Kanban Board built with React, Vite, and SurrealDB 2.3.10 featuring a pure Terminal Aesthetic.
 
-Currently, two official plugins are available:
+![Terminal Kanban Dashboard](https://via.placeholder.com/800x400.png?text=Terminal+Kanban+Dashboard)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ⚡ Features
+- **Realtime Sync**: Native WebSockets and Live Queries via SurrealDB 2.x SDK.
+- **Terminal Aesthetic**: Dark mode, JetBrains Mono, high contrast design.
+- **Native HTML5 Drag & Drop**: Smooth column management.
+- **Slide-in Detail Panel**: Quick edit descriptions, tags, and status.
+- **NixOS Compatible**: Fully reproducible environments.
 
-## React Compiler
+## 🛠 Database Management
+We recommend **Surrealist** for managing your SurrealDB data visually.
+* **[Surrealist (Official GUI)](https://surrealist.app)** (or https://app.surrealdb.com)
+  * Query Playground
+  * Record Explorer
+  * Schema Designer
+  * *Connect to `ws://localhost:8000` with `root/root`*
+* **surreal SQL CLI**: For fast queries directly in your terminal.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Quick Start
 
-## Expanding the ESLint configuration
+1. **Clone & Install**
+   ```bash
+   git clone https://github.com/yourusername/surreal-board.git
+   cd surreal-board
+   npm install
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. **Environment Setup**
+   Copy the example environment file and adjust if necessary:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Start the Database & App**
+   ```bash
+   make dev
+   ```
+
+## ⌨️ Makefile Commands (`make help`)
+```text
+Available commands:
+make dev      Start development server and database
+make stop     Stop all related containers
+make build    Build for production
+make logs     View application logs
+make help     Show this help message
+```
+
+## 🤝 Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## 📝 License
+MIT License © 2026 Andreas Bader. See [LICENSE](LICENSE) for details.
