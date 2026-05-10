@@ -16,7 +16,7 @@
 
 | Dark Theme | Light Theme |
 |---|---|
-| ![surbanai dark theme](./docs/screenshot-dark.png) | ![surbanai light theme](./docs/screenshot-light.png) |
+| <img src="./docs/screenshot-dark.png" width="100%"> | <img src="./docs/screenshot-light.png" width="100%"> |
 
 ---
 
