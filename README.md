@@ -34,10 +34,20 @@
 
 ## Quick Start
 
-git clone https://github.com/diebugger-tech/surbanai
-cd surbanai
-cp .env.example .env
-npm install && npm run dev
+Works on any Linux, macOS, or Windows WSL2.
+
+1. Install SurrealDB:
+   curl -sSf https://install.surrealdb.com | sh
+
+2. Clone and run:
+   git clone https://github.com/diebugger-tech/surbanai
+   cd surbanai
+   cp .env.example .env
+   npm install
+   surreal start --bind 127.0.0.1:8000 --user root --pass root surrealkv://./data &
+   npm run dev
+
+3. Open http://localhost:5174
 
 Edit .env:
 VITE_SURREAL_URL=ws://127.0.0.1:8000/rpc
@@ -45,6 +55,8 @@ VITE_SURREAL_USER=root
 VITE_SURREAL_PASS=root
 VITE_SURREAL_NS=kanban
 VITE_SURREAL_DB=projects
+
+NixOS: nix-shell -p surrealdb nodejs
 
 ---
 
