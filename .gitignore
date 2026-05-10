@@ -34,3 +34,4 @@ knowledge/
 __pycache__/
 *.pyc
 awesome-surreal/
+system-check.sh
