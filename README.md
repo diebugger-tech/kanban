@@ -6,29 +6,30 @@
 ![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![NixOS Compatible](https://img.shields.io/badge/NixOS-Compatible-5277C3?style=for-the-badge&logo=nixos)
 
-> **sur·ban·ai** = **sur**real + kan**ban** + **ai**
+> **SurKAi v1.3** = **sur**real + **k**anban + **ai**
 >
-> Zero-backend realtime Kanban board powered by SurrealDB WebSocket
+> Zero-backend realtime Kanban board powered by SurrealDB 2.x & AI Assistant.
 
 ---
 
-## Screenshots
+## What's new in v1.3
 
-| Dark Theme | Light Theme |
-|---|---|
-| <img src="./docs/screenshot-dark.png" width="100%"> | <img src="./docs/screenshot-light.png" width="100%"> |
+- **KAi Assistant** — AI-powered task generator with **Wiki Context Sync**. KAi understands your project architecture before suggesting tasks.
+- **Advanced Project Wiki** — Integrated documentation with **Mermaid.js** diagrams and **Prism** syntax highlighting.
+- **Architecture Templates** — One-click templates for **ADR** (Architectural Decision Records), **Setup**, and **Architecture** docs.
+- **System Dashboard** — Dynamic status monitor in the empty Backlog column (Global Pulse, DB Stats, KAi Health).
+- **Magnetic UX** — Todo-Panel with magnetic snap-points, position persistence, and double-click collapse.
+- **System Manifest** — Automatic project sidebar in Wiki showing Stack, Ports, and Entrypoints.
+- **SurrealDB 2.x Support** — Full compatibility with SurrealDB v2.x (Auth & Export headers).
 
----
+## Core Features
 
-## Features
-
-- **Realtime** — SurrealDB LIVE SELECT for instant sync across all clients
-- **Zero Backend** — Browser connects directly to SurrealDB via WebSocket
-- **Dark/Light Theme** — Terminal hacker dark + clean light mode with localStorage persistence
-- **Drag & Drop** — Move cards between columns via native HTML5 API
-- **Detail Panel** — Click any card to edit inline, copy START/STOP commands to clipboard
-- **NixOS Compatible** — Works with declarative NixOS environments
-- **.project.toml Sync** — Auto-sync projects from config files to SurrealDB
+- **Realtime** — SurrealDB LIVE SELECT for instant sync across all clients.
+- **Zero Backend** — Browser connects directly to SurrealDB via WebSocket. No middleware needed.
+- **Terminal Aesthetics** — High-end hacker dark theme with premium glassmorphism and animations.
+- **Drag & Drop** — Serialized RecordID handling for safe SurrealDB updates.
+- **Detail Panel** — Inline editing with CLI command copy-to-clipboard integration.
+- **NixOS Compatible** — Declarative development environments (nix-shell/flakes).
 
 ---
 
