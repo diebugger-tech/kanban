@@ -1,4 +1,4 @@
-# Contributing to Surbanai
+# Contributing to SurKAi
 
 First off, thanks for taking the time to contribute! 🎉
 
