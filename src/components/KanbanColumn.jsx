@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import KanbanCard from './KanbanCard';
+import BacklogDashboard from './BacklogDashboard';
 
-export default function KanbanColumn({ column, projects, isLoading, onDragStart, onDragEnd, onDragOver, onDrop, onCardClick }) {
+export default function KanbanColumn({ column, projects, isLoading, onDragStart, onDragEnd, onDragOver, onDrop, onCardClick, wikiStats, allProjects }) {
+  const [isOver, setIsOver] = useState(false);
   const styles = {
     column: {
       backgroundColor: 'var(--bg-secondary)',
@@ -9,9 +11,9 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
       borderRadius: '4px',
       padding: '1rem',
       minHeight: '600px',
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      boxShadow: isOver ? `0 0 15px ${column.color}` : 'none',
+      borderColor: isOver ? column.color : 'var(--border)'
     },
     columnHeader: {
       color: column.color,
@@ -47,7 +49,12 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
     <div
       style={styles.column}
       onDragOver={onDragOver}
-      onDrop={(e) => onDrop(e, column.id)}
+      onDragEnter={() => setIsOver(true)}
+      onDragLeave={() => setIsOver(false)}
+      onDrop={(e) => {
+        setIsOver(false);
+        onDrop(e, column.id);
+      }}
     >
       <div style={styles.columnHeader}>
         <span>⬤</span> {column.title}
@@ -68,8 +75,11 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             onClick={onCardClick}
+            wikiStats={wikiStats}
           />
         ))
+      ) : column.id === 'backlog' ? (
+        <BacklogDashboard allProjects={allProjects || []} wikiStats={wikiStats || {}} />
       ) : (
         <div style={styles.emptyState}>
           &gt; NO TASKS

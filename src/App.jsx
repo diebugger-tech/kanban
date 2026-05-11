@@ -87,6 +87,9 @@ export default function App() {
   const selectedProject = projects.find(p => p.id.toString() === selectedProjectId?.toString());
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         setShowCommandPalette(prev => !prev);
@@ -172,6 +175,7 @@ export default function App() {
             onDrop={handleDrop}
             onCardClick={(id) => setSelectedProjectId(id)}
             wikiStats={wikiStats}
+            allProjects={projects}
           />
         ))}
       </main>
