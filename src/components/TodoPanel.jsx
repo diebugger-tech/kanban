@@ -27,7 +27,8 @@ export default function TodoPanel({ onClose }) {
         'SELECT * FROM wiki WHERE typ = $typ ORDER BY prioritaet ASC, erstellt DESC',
         { typ: 'todo' }
       );
-      setTodos(result[0] ?? []);
+      const data = result[0]?.result || result[0] || [];
+      setTodos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Todo load failed:', err);
     }
@@ -68,11 +69,21 @@ export default function TodoPanel({ onClose }) {
     if (!kaiPrompt.trim()) return;
     setKaiLoading(true);
     try {
+      const currentProj = filter === 'alle' ? 'SurKAi' : filter;
+      
+      // Fetch relevant wiki context
+      const wikiRes = await db.query(
+        'SELECT titel, inhalt FROM wiki WHERE (projekt = $p OR typ = "system") AND typ != "todo" LIMIT 3',
+        { p: currentProj }
+      );
+      const context = wikiRes[0]?.result || [];
+      const contextStr = context.map(c => `[WIKI: ${c.titel}]\n${c.inhalt.substring(0, 300)}`).join('\n---\n');
+
       const res = await fetch('http://localhost:11434/api/generate', {
         method: 'POST',
         body: JSON.stringify({
           model: 'qwen2.5-coder:latest',
-          prompt: `Du bist KAi, ein Projekt-Assistent. Erstelle aus diesem Text ein prägnantes TODO (nur den Titel): ${kaiPrompt}`,
+          prompt: `Du bist KAi, ein Projekt-Assistent. Nutze den folgenden Wiki-Kontext um die Anfrage zu verstehen.\n\nKONTEXT:\n${contextStr}\n\nANFRAGE: ${kaiPrompt}\n\nErstelle daraus ein prägnantes TODO (NUR den Titel des Todos zurückgeben):`,
           stream: false
         })
       });
@@ -80,7 +91,7 @@ export default function TodoPanel({ onClose }) {
       if (data.response) {
         await db.query(
           'CREATE wiki SET projekt=$p, typ=$t, titel=$ti, status=$s, prioritaet=$pr, erstellt=time::now(), geaendert=time::now()',
-          { p: filter === 'alle' ? 'SurKAi' : filter, t: 'todo', ti: data.response.trim(), s: 'open', pr: 'medium' }
+          { p: currentProj, t: 'todo', ti: data.response.trim().replace(/^"|"$/g, ''), s: 'open', pr: 'medium' }
         );
         setKaiPrompt('');
       }
