@@ -8,6 +8,9 @@ export default function WikiPanel({ projekt, onClose }) {
   const [allProjects, setAllProjects] = useState([]);
   const [currentScope, setCurrentScope] = useState(projekt?.name || 'SurKAi');
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [showNewModal, setShowNewModal] = useState(false);
 
   // Load all projects for the switcher
   useEffect(() => {
@@ -47,6 +50,31 @@ export default function WikiPanel({ projekt, onClose }) {
     return () => unsub.then(u => u());
   }, [load, currentScope]);
 
+  const handleSaveEntry = async (entry) => {
+    try {
+      if (entry.id) {
+        await db.merge(entry.id, {
+          titel: entry.titel,
+          inhalt: entry.inhalt,
+          geaendert: new Date().toISOString()
+        });
+      } else {
+        await db.create('wiki', {
+          ...entry,
+          projekt: entry.typ === 'system' ? 'Global' : currentScope,
+          status: 'open',
+          erstellt: new Date().toISOString(),
+          geaendert: new Date().toISOString()
+        });
+      }
+      setEditingEntry(null);
+      setShowNewModal(false);
+      load();
+    } catch (err) {
+      console.error('Save entry failed:', err);
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -64,8 +92,14 @@ export default function WikiPanel({ projekt, onClose }) {
   ];
 
   const getCount = (sectionId) => {
-    if (sectionId === 'system') return entries.filter(e => e.typ === 'system').length;
-    return entries.filter(e => e.typ === sectionId && e.projekt === currentScope).length;
+    const filtered = entries.filter(e => {
+      const matchesSearch = e.titel.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           e.inhalt.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+      if (sectionId === 'system') return e.typ === 'system';
+      return e.typ === sectionId && e.projekt === currentScope;
+    });
+    return filtered.length;
   };
 
   const renderMarkdown = (content) => {
@@ -73,49 +107,98 @@ export default function WikiPanel({ projekt, onClose }) {
   };
 
   const renderContent = () => {
-    if (activePage === 'shortcuts') {
+    if (editingEntry) {
       return (
-        <div className="wiki-markdown">
-          <h2>⌨️ Tastaturkürzel</h2>
-          <p>Effizientes Arbeiten mit SurKAi:</p>
-          <table style={styles.table}>
-            <thead>
-              <tr><th style={styles.th}>Taste</th><th style={styles.th}>Aktion</th></tr>
-            </thead>
-            <tbody>
-              <tr><td style={styles.td}><code>?</code></td><td style={styles.td}>Wiki öffnen/schließen</td></tr>
-              <tr><td style={styles.td}><code>T</code></td><td style={styles.td}>Todo-Panel öffnen/schließen</td></tr>
-              <tr><td style={styles.td}><code>ESC</code></td><td style={styles.td}>Aktives Panel schließen</td></tr>
-              <tr><td style={styles.td}><code>J</code> / <code>K</code></td><td style={styles.td}>Navigation (Detail-Panel)</td></tr>
-              <tr><td style={styles.td}><code>+</code></td><td style={styles.td}>Neues Projekt (Navbar)</td></tr>
-            </tbody>
-          </table>
+        <div style={styles.editorContainer}>
+          <div style={styles.editorHeader}>
+            <h2 style={{ color: 'var(--accent-green)' }}>&gt; {editingEntry.id ? 'EDIT_ENTRY' : 'CREATE_ENTRY'}</h2>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <select 
+                style={{ ...styles.input, width: 'auto' }}
+                value={editingEntry.typ}
+                onChange={e => setEditingEntry({ ...editingEntry, typ: e.target.value })}
+              >
+                <option value="doc">DOC</option>
+                <option value="bug">BUG</option>
+                <option value="todo">TODO</option>
+                <option value="system">SYSTEM</option>
+              </select>
+            </div>
+          </div>
+          
+          <input 
+            style={styles.editorTitleInput}
+            value={editingEntry.titel}
+            onChange={e => setEditingEntry({ ...editingEntry, titel: e.target.value })}
+            placeholder="ENTRY_TITLE"
+          />
+
+          <textarea 
+            style={styles.editorTextarea}
+            value={editingEntry.inhalt}
+            onChange={e => setEditingEntry({ ...editingEntry, inhalt: e.target.value })}
+            placeholder="MARKDOWN_CONTENT..."
+          />
+
+          <div style={styles.editorFooter}>
+            <button 
+              style={{ ...styles.submitBtn, backgroundColor: 'var(--accent-green)' }}
+              onClick={() => handleSaveEntry(editingEntry)}
+            >
+              [ SAVE_CHANGES ]
+            </button>
+            <button 
+              style={{ ...styles.submitBtn, backgroundColor: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+              onClick={() => setEditingEntry(null)}
+            >
+              [ DISCARD ]
+            </button>
+          </div>
         </div>
       );
     }
 
+    if (activePage === 'shortcuts') {
+...
     const filtered = entries.filter(e => {
+      const matchesSearch = e.titel.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           e.inhalt.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
       if (activePage === 'system') return e.typ === 'system';
       return e.typ === activePage && e.projekt === currentScope;
     });
 
     return (
       <div className="wiki-markdown">
-        <h2 style={{ textTransform: 'uppercase' }}>
-          {sections.find(p => p.id === activePage)?.icon} {activePage === 'system' ? 'System Rules' : activePage + 's'}
-        </h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ textTransform: 'uppercase', margin: 0 }}>
+            {sections.find(p => p.id === activePage)?.icon} {activePage === 'system' ? 'System Rules' : activePage + 's'}
+          </h2>
+          {searchQuery && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--accent-orange)' }}>
+              FILTERING: "{searchQuery}" ({filtered.length} matches)
+            </div>
+          )}
+        </div>
         
         {loading ? (
           <div className="skeleton" style={{ height: '100px', width: '100%' }}></div>
         ) : filtered.length === 0 ? (
           <div style={{ color: 'var(--text-muted)', marginTop: '2rem' }}>&gt; NO ENTRIES FOUND FOR [{currentScope}]</div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {filtered.map(entry => (
               <div key={entry.id} style={styles.entry}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(0, 255, 170, 0.1)', paddingBottom: '0.5rem' }}>
                   <h3 style={{ margin: 0, color: 'var(--accent-green)' }}>{entry.titel}</h3>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button 
+                      style={styles.editIconBtn}
+                      onClick={() => setEditingEntry(entry)}
+                      title="Edit Entry"
+                    >
+                      ✎
+                    </button>
                     {entry.prioritaet && (
                       <span style={{ 
                         fontSize: '0.6rem', 
@@ -139,7 +222,7 @@ export default function WikiPanel({ projekt, onClose }) {
                 />
 
                 <div style={{ marginTop: '1.2rem', fontSize: '0.65rem', color: 'var(--text-muted)', borderTop: '1px dotted var(--border)', paddingTop: '0.5rem' }}>
-                  PROJEKT: {entry.projekt} // STATUS: {entry.status.toUpperCase()} // UPDATED: {new Date(entry.geaendert).toLocaleString()}
+                  PROJEKT: {entry.projekt} // STATUS: {entry.status?.toUpperCase() || 'N/A'} // UPDATED: {new Date(entry.geaendert).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -203,6 +286,49 @@ export default function WikiPanel({ projekt, onClose }) {
     entry: {
       padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)',
       borderRadius: '4px'
+    },
+    searchInput: {
+      width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-primary)',
+      border: '1px solid var(--border)', color: 'var(--text-primary)',
+      fontFamily: 'monospace', fontSize: '0.75rem', outline: 'none'
+    },
+    newBtn: {
+      width: '100%', padding: '0.6rem', backgroundColor: 'rgba(0, 255, 170, 0.1)',
+      border: '1px solid var(--accent-green)', color: 'var(--accent-green)',
+      fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '1rem',
+      cursor: 'pointer', transition: 'all 0.2s'
+    },
+    editIconBtn: {
+      background: 'transparent', border: 'none', color: 'var(--text-muted)',
+      cursor: 'pointer', fontSize: '1rem', padding: '0 0.5rem', transition: 'color 0.2s'
+    },
+    editorContainer: {
+      display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%'
+    },
+    editorHeader: {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'
+    },
+    editorTitleInput: {
+      width: '100%', backgroundColor: 'var(--bg-secondary)', color: 'var(--accent-green)',
+      border: '1px solid var(--border)', padding: '0.8rem', fontFamily: 'inherit', fontSize: '1.1rem',
+      outline: 'none'
+    },
+    editorTextarea: {
+      flex: 1, backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)',
+      border: '1px solid var(--border)', padding: '1rem', fontFamily: 'inherit',
+      fontSize: '0.9rem', minHeight: '400px', resize: 'none', outline: 'none',
+      lineHeight: '1.6'
+    },
+    editorFooter: {
+      display: 'flex', gap: '1rem', marginTop: '0.5rem'
+    },
+    submitBtn: {
+      padding: '0.8rem 1.5rem', border: 'none', color: 'var(--bg-primary)',
+      fontWeight: 'bold', cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '1px'
+    },
+    input: {
+      backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)',
+      padding: '0.5rem', fontFamily: 'inherit'
     }
   };
 
@@ -226,6 +352,25 @@ export default function WikiPanel({ projekt, onClose }) {
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
           </select>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <input 
+              type="text" 
+              placeholder="SEARCH_WIKI..." 
+              style={styles.searchInput}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <button 
+            style={styles.newBtn}
+            onClick={() => {
+              setEditingEntry({ typ: activePage === 'system' || activePage === 'shortcuts' ? 'doc' : activePage, titel: '', inhalt: '' });
+            }}
+          >
+            [ + NEW_ENTRY ]
+          </button>
 
           {sections.map(section => (
             <div 
