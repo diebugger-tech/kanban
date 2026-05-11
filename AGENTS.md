@@ -1,7 +1,7 @@
-# AI Agent Constraints & Architecture (surbanai)
+# AI Agent Constraints & Architecture (SurKAi)
 
 > Global context and technical constraints for AI coding agents working on this repository.
-> Repo: github.com/diebugger-tech/surbanai
+> Repo: github.com/diebugger-tech/SurKAi
 
 ## 🏗 Project Structure
 - `src/components/`: Modular UI components (Columns, Cards, DetailPanel).
