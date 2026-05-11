@@ -11,8 +11,12 @@
   },
   "dependencies": {
     "marked": "^18.0.3",
+    "mermaid": "^11.15.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.1",
     "surrealdb": "^2.0.3"
   },
   "devDependencies": {

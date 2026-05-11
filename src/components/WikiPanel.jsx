@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import db from '../lib/db';
-import { marked } from 'marked';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Mermaid from './Mermaid';
 
 export default function WikiPanel({ projekt, onClose }) {
   const [activePage, setActivePage] = useState('doc');
@@ -132,7 +136,38 @@ export default function WikiPanel({ projekt, onClose }) {
   };
 
   const renderMarkdown = (content) => {
-    return { __html: marked.parse(content) };
+    return (
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const lang = match ? match[1] : '';
+
+            if (!inline && lang === 'mermaid') {
+              return <Mermaid chart={String(children).replace(/\n$/, '')} />;
+            }
+
+            return !inline && match ? (
+              <SyntaxHighlighter
+                style={vscDarkPlus}
+                language={match[1]}
+                PreTag="div"
+                {...props}
+              >
+                {String(children).replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          }
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
   };
 
   const renderContent = () => {
@@ -246,11 +281,9 @@ export default function WikiPanel({ projekt, onClose }) {
                   </div>
                 </div>
                 
-                <div 
-                  className="markdown-body"
-                  dangerouslySetInnerHTML={renderMarkdown(entry.inhalt)}
-                  style={{ fontSize: '0.9rem', lineHeight: '1.6' }}
-                />
+                <div className="markdown-body" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  {renderMarkdown(entry.inhalt)}
+                </div>
 
                 <div style={{ marginTop: '1.2rem', fontSize: '0.65rem', color: 'var(--text-muted)', borderTop: '1px dotted var(--border)', paddingTop: '0.5rem' }}>
                   PROJEKT: {entry.projekt} // STATUS: {entry.status?.toUpperCase() || 'N/A'} // UPDATED: {new Date(entry.geaendert).toLocaleString()}
