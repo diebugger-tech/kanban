@@ -7,6 +7,7 @@ import DetailPanel from './components/DetailPanel';
 import Navbar from './components/Navbar';
 import WikiPanel from './components/WikiPanel';
 import TodoPanel from './components/TodoPanel';
+import CreateProjectModal from './components/CreateProjectModal';
 
 export default function App() {
   const { projects, dbStatus, dbError, loading: isLoading } = useSurrealDB();
@@ -123,6 +124,12 @@ export default function App() {
         />
       )}
       {showTodo && <TodoPanel onClose={() => setShowTodo(false)} />}
+      
+      <CreateProjectModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+        onNotify={showToast}
+      />
 
       <div className="toast-container">
         {toasts.map(t => (
