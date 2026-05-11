@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import db from '../lib/db';
 
-export default function CreateProjectModal({ isOpen, onClose, onNotify }) {
+export default function CreateProjectModal({ isOpen, onClose, onNotify, onCreate }) {
   const [formData, setFormData] = useState({
     name: '',
     icon: '🚀',
@@ -27,27 +27,28 @@ export default function CreateProjectModal({ isOpen, onClose, onNotify }) {
 
     setLoading(true);
     try {
-      await db.create('projekt', {
-        ...formData,
-        tags: [],
-        erstellt: new Date().toISOString(),
-        updated: new Date().toISOString()
+      const [res] = await db.query('CREATE projekt SET $data', { 
+        data: {
+          ...formData,
+          tags: [],
+          erstellt: new Date().toISOString(),
+          updated: new Date().toISOString()
+        }
       });
+      const newProj = res.result?.[0] || res[0];
       onNotify('Project created successfully');
+      if (onCreate) onCreate(newProj);
       onClose();
       // Reset form
       setFormData({
         name: '',
         icon: '🚀',
-        stack: 'SvelteKit 5, SurrealDB',
-        desc: '',
-        status: 'backlog',
-        cmd_start: 'npm run dev',
-        cmd_stop: 'CTRL+C'
+        stack: 'React',
+        status: 'todo'
       });
     } catch (err) {
-      console.error('Creation failed:', err);
-      onNotify('Failed to create project', 'error');
+      console.error('Create failed:', err);
+      onNotify(`Creation failed: ${err.message}`, 'error');
     } finally {
       setLoading(false);
     }
