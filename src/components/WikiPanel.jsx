@@ -1,7 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import db from '../lib/db';
+import { marked } from 'marked';
 
-export default function WikiPanel({ onClose }) {
-  const [activePage, setActivePage] = useState('overview');
+export default function WikiPanel({ projekt, onClose }) {
+  const [activePage, setActivePage] = useState('doc');
+  const [entries, setEntries] = useState([]);
+  const [allProjects, setAllProjects] = useState([]);
+  const [currentScope, setCurrentScope] = useState(projekt?.name || 'SurKAi');
+  const [loading, setLoading] = useState(true);
+
+  // Load all projects for the switcher
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await db.query('SELECT name FROM projects ORDER BY name ASC');
+        setAllProjects(res[0] || []);
+      } catch (err) {
+        console.error('Failed to fetch projects for wiki:', err);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      // Fetch both project-specific entries and global system entries
+      const result = await db.query(
+        'SELECT * FROM wiki WHERE projekt = $name OR typ = "system" ORDER BY erstellt DESC',
+        { name: currentScope }
+      );
+      setEntries(result[0] ?? []);
+    } catch (err) {
+      console.error('Wiki load failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentScope]);
+
+  useEffect(() => {
+    load();
+    const unsub = db.live('wiki', (action, record) => {
+      if (record.projekt === currentScope || record.typ === 'system') load();
+    });
+    return () => unsub.then(u => u());
+  }, [load, currentScope]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -11,177 +54,141 @@ export default function WikiPanel({ onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  const pages = [
-    { id: 'overview', title: 'Übersicht', icon: '🏠' },
-    { id: 'kanban', title: 'Kanban Board', icon: '📋' },
-    { id: 'shortcuts', title: 'Tastaturkürzel', icon: '⌨️' },
-    { id: 'dragdrop', title: 'Drag & Drop', icon: '🖱️' },
-    { id: 'surreal', title: 'SurrealDB API', icon: '💾' },
-    { id: 'bugs', title: 'Bekannte Bugs', icon: '🪲' },
-    { id: 'changelog', title: 'Changelog', icon: '📜' },
+  const sections = [
+    { id: 'system', title: 'System', icon: '⚙️', type: 'system' },
+    { id: 'doc', title: 'Docs', icon: '📄', type: 'project' },
+    { id: 'bug', title: 'Bugs', icon: '🪲', type: 'project' },
+    { id: 'todo', title: 'TODOs', icon: '✅', type: 'project' },
+    { id: 'shortcuts', title: 'Shortcuts', icon: '⌨️', type: 'meta' },
   ];
 
+  const getCount = (sectionId) => {
+    if (sectionId === 'system') return entries.filter(e => e.typ === 'system').length;
+    return entries.filter(e => e.typ === sectionId && e.projekt === currentScope).length;
+  };
+
+  const renderMarkdown = (content) => {
+    return { __html: marked.parse(content) };
+  };
+
   const renderContent = () => {
-    switch (activePage) {
-      case 'overview':
-        return (
-          <>
-            <h2>🏠 Übersicht</h2>
-            <p>Willkommen bei <strong>surbanai</strong> – deinem Echtzeit-Kanban-Dashboard powered by SurrealDB.</p>
-            <h3>🚀 Schnellstart</h3>
-            <ul>
-              <li>Projekte werden automatisch aus der SurrealDB geladen.</li>
-              <li>Klicke auf eine Karte, um Details zu bearbeiten.</li>
-              <li>Verschiebe Karten per Drag & Drop zwischen den Spalten.</li>
-            </ul>
-            <h3>✅ Feature-Status</h3>
-            <table style={styles.table}>
-              <thead>
-                <tr><th style={styles.th}>Feature</th><th style={styles.th}>Status</th></tr>
-              </thead>
-              <tbody>
-                <tr><td style={styles.td}>Real-time Updates</td><td style={styles.td}>✅ Live (SurrealDB)</td></tr>
-                * <tr><td style={styles.td}>Dark/Light Theme</td><td style={styles.td}>✅ Aktiv</td></tr>
-                * <tr><td style={styles.td}>Skeleton Loading</td><td style={styles.td}>✅ Aktiv</td></tr>
-                * <tr><td style={styles.td}>Wiki / Hilfe</td><td style={styles.td}>✅ Neu (v1.2)</td></tr>
-              </tbody>
-            </table>
-          </>
-        );
-      case 'kanban':
-        return (
-          <>
-            <h2>📋 Kanban Board</h2>
-            <p>Das Board ist in drei Hauptspalten unterteilt:</p>
-            <ul>
-              <li><strong>BACKLOG:</strong> Neue Ideen und Aufgaben, die noch nicht gestartet wurden.</li>
-              <li><strong>IN PROGRESS:</strong> Aktive Projekte in Bearbeitung.</li>
-              <li><strong>DONE:</strong> Abgeschlossene Meilensteine.</li>
-            </ul>
-            <h3>✨ UX Features</h3>
-            <ul>
-              <li><strong>Skeleton Loader:</strong> Beim DB-Connect erscheinen pulsierende Platzhalter.</li>
-              <li><strong>Empty States:</strong> Leere Spalten zeigen <code>&gt; NO TASKS</code> an.</li>
-            </ul>
-          </>
-        );
-      case 'shortcuts':
-        return (
-          <>
-            <h2>⌨️ Tastaturkürzel</h2>
-            <p>Effizientes Arbeiten mit surbanai:</p>
-            <table style={styles.table}>
-              <thead>
-                <tr><th style={styles.th}>Taste</th><th style={styles.th}>Aktion</th></tr>
-              </thead>
-              <tbody>
-                <tr><td style={styles.td}><code>?</code></td><td style={styles.td}>Dieses Wiki öffnen/schließen</td></tr>
-                <tr><td style={styles.td}><code>ESC</code></td><td style={styles.td}>Aktives Panel (Wiki/Detail) schließen</td></tr>
-              </tbody>
-            </table>
-          </>
-        );
-      case 'dragdrop':
-        return (
-          <>
-            <h2>🖱️ Drag & Drop</h2>
-            <p>Verschiebe Projekte einfach zwischen den Spalten, um ihren Status zu ändern.</p>
-            <div style={styles.bugBox}>
-              <strong>⚠️ Bekannter Bug: RecordID-Serialisierung</strong>
-              <p>In einigen Browser-Umgebungen überträgt der <code>dataTransfer</code> die SurrealDB-ID fälschlicherweise als String <code>'drag'</code>.</p>
-              <p><em>Fehlermeldung:</em> <code>Expected a record but cannot convert 'drag' into a record</code></p>
-              <p><strong>Workaround (v1.2):</strong> In der <code>handleDrop()</code> Funktion wurde eine Sicherheitsprüfung eingebaut: <code>if (!id || id === 'drag') return;</code></p>
-            </div>
-          </>
-        );
-      case 'surreal':
-        return (
-          <>
-            <h2>💾 SurrealDB API</h2>
-            <p>surbanai nutzt die SurrealDB JavaScript SDK v2.x.</p>
-            <h3>Wichtige Queries:</h3>
-            <pre style={styles.code}>
-{`// Projekte abrufen
-SELECT * FROM projekt;
-
-// Live-Updates abonnieren
-LIVE SELECT * FROM projekt;
-
-// Projekt aktualisieren
-UPDATE type::thing($id) MERGE $data;`}
-            </pre>
-          </>
-        );
-      case 'bugs':
-        return (
-          <>
-            <h2>🪲 Bekannte Bugs</h2>
-            <table style={styles.table}>
-              <thead>
-                <tr><th style={styles.th}>Bug</th><th style={styles.th}>Status</th></tr>
-              </thead>
-              <tbody>
-                <tr><td style={styles.td}>Drag & Drop RecordID Error</td><td style={styles.td}>🟡 Workaround aktiv</td></tr>
-                <tr><td style={styles.td}>Wayland Hit-Test (3DNTerminal)</td><td style={styles.td}>🔴 Bekannt</td></tr>
-                <tr><td style={styles.td}>Corner-Sync (3DNTerminal)</td><td style={styles.td}>🔴 Bekannt</td></tr>
-              </tbody>
-            </table>
-          </>
-        );
-      case 'changelog':
-        return (
-          <>
-            <h2>📜 Changelog</h2>
-            <h3>v1.2 – UX & Hilfe (Aktuell)</h3>
-            <ul>
-              <li>Neu: <strong>WikiPanel</strong> mit Navigation und Dokumentation.</li>
-              <li>Neu: <strong>Keyboard Shortcuts</strong> (ESC zum Schließen, ? für Hilfe).</li>
-              <li>Neu: <strong>Toast Notifications</strong> beim Speichern/Verschieben.</li>
-              <li>Neu: <strong>Skeleton Loader</strong> für besseres Feedback beim DB-Connect.</li>
-              <li>Verbessert: Darstellung leerer Spalten.</li>
-            </ul>
-            <h3>v1.1 – Core Refactor</h3>
-            <ul>
-              <li>Umstellung auf <strong>Clean Architecture</strong> (Modular Components).</li>
-              <li>Implementierung von <strong>db.js Singleton</strong>.</li>
-            </ul>
-          </>
-        );
-      default:
-        return null;
+    if (activePage === 'shortcuts') {
+      return (
+        <div className="wiki-markdown">
+          <h2>⌨️ Tastaturkürzel</h2>
+          <p>Effizientes Arbeiten mit SurKAi:</p>
+          <table style={styles.table}>
+            <thead>
+              <tr><th style={styles.th}>Taste</th><th style={styles.th}>Aktion</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style={styles.td}><code>?</code></td><td style={styles.td}>Wiki öffnen/schließen</td></tr>
+              <tr><td style={styles.td}><code>T</code></td><td style={styles.td}>Todo-Panel öffnen/schließen</td></tr>
+              <tr><td style={styles.td}><code>ESC</code></td><td style={styles.td}>Aktives Panel schließen</td></tr>
+              <tr><td style={styles.td}><code>J</code> / <code>K</code></td><td style={styles.td}>Navigation (Detail-Panel)</td></tr>
+              <tr><td style={styles.td}><code>+</code></td><td style={styles.td}>Neues Projekt (Navbar)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      );
     }
+
+    const filtered = entries.filter(e => {
+      if (activePage === 'system') return e.typ === 'system';
+      return e.typ === activePage && e.projekt === currentScope;
+    });
+
+    return (
+      <div className="wiki-markdown">
+        <h2 style={{ textTransform: 'uppercase' }}>
+          {sections.find(p => p.id === activePage)?.icon} {activePage === 'system' ? 'System Rules' : activePage + 's'}
+        </h2>
+        
+        {loading ? (
+          <div className="skeleton" style={{ height: '100px', width: '100%' }}></div>
+        ) : filtered.length === 0 ? (
+          <div style={{ color: 'var(--text-muted)', marginTop: '2rem' }}>&gt; NO ENTRIES FOUND FOR [{currentScope}]</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1.5rem' }}>
+            {filtered.map(entry => (
+              <div key={entry.id} style={styles.entry}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(0, 255, 170, 0.1)', paddingBottom: '0.5rem' }}>
+                  <h3 style={{ margin: 0, color: 'var(--accent-green)' }}>{entry.titel}</h3>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {entry.prioritaet && (
+                      <span style={{ 
+                        fontSize: '0.6rem', 
+                        padding: '0.1rem 0.4rem', 
+                        border: '1px solid currentColor',
+                        color: entry.prioritaet === 'high' ? 'var(--error)' : 'var(--accent-orange)'
+                      }}>
+                        {entry.prioritaet.toUpperCase()}
+                      </span>
+                    )}
+                    <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem', backgroundColor: 'var(--bg-primary)', color: 'var(--text-muted)' }}>
+                      {entry.typ.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                
+                <div 
+                  className="markdown-body"
+                  dangerouslySetInnerHTML={renderMarkdown(entry.inhalt)}
+                  style={{ fontSize: '0.9rem', lineHeight: '1.6' }}
+                />
+
+                <div style={{ marginTop: '1.2rem', fontSize: '0.65rem', color: 'var(--text-muted)', borderTop: '1px dotted var(--border)', paddingTop: '0.5rem' }}>
+                  PROJEKT: {entry.projekt} // STATUS: {entry.status.toUpperCase()} // UPDATED: {new Date(entry.geaendert).toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const styles = {
     overlay: {
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'var(--bg-overlay)', backdropFilter: 'blur(4px)', zIndex: 2000,
+      backgroundColor: 'var(--bg-overlay)', backdropFilter: 'blur(10px)', zIndex: 2000,
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem'
     },
     container: {
-      width: '100%', maxWidth: '900px', height: '80vh',
-      backgroundColor: 'var(--bg-primary)', border: '2px solid var(--border)',
-      boxShadow: '0 0 30px var(--shadow)', display: 'flex', position: 'relative'
+      width: '100%', maxWidth: '1000px', height: '85vh',
+      backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
+      boxShadow: '0 0 50px rgba(0,0,0,0.5)', display: 'flex', position: 'relative',
+      overflow: 'hidden'
     },
     sidebar: {
-      width: '240px', borderRight: '1px solid var(--border)', padding: '1.5rem',
-      backgroundColor: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem'
+      width: '260px', borderRight: '1px solid var(--border)', padding: '1.5rem',
+      backgroundColor: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem',
+      overflowY: 'auto'
     },
     main: {
-      flex: 1, padding: '2.5rem', overflowY: 'auto', color: 'var(--text-primary)'
+      flex: 1, padding: '3rem', overflowY: 'auto', color: 'var(--text-primary)',
+      backgroundColor: 'var(--bg-primary)'
     },
     navItem: (active) => ({
-      padding: '0.8rem 1rem', cursor: 'pointer', border: '1px solid transparent',
+      padding: '0.8rem 1rem', cursor: 'pointer', borderLeft: '3px solid transparent',
       color: active ? 'var(--accent-green)' : 'var(--text-secondary)',
       backgroundColor: active ? 'rgba(0, 255, 170, 0.05)' : 'transparent',
       borderColor: active ? 'var(--accent-green)' : 'transparent',
       fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.7rem',
-      transition: 'all 0.2s'
+      transition: 'all 0.2s',
+      marginBottom: '2px'
     }),
     closeBtn: {
       position: 'absolute', top: '1rem', right: '1rem',
-      background: 'transparent', border: 'none', color: 'var(--error)',
-      fontSize: '1.2rem', cursor: 'pointer', fontFamily: 'monospace'
+      background: 'transparent', border: 'none', color: 'var(--text-muted)',
+      fontSize: '1rem', cursor: 'pointer', fontFamily: 'monospace',
+      zIndex: 10
+    },
+    projectSelect: {
+      width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-primary)',
+      border: '1px solid var(--border)', color: 'var(--accent-green)',
+      fontFamily: 'monospace', fontSize: '0.8rem', marginBottom: '1.5rem',
+      outline: 'none'
     },
     table: {
       width: '100%', borderCollapse: 'collapse', marginTop: '1rem', fontSize: '0.85rem'
@@ -192,33 +199,54 @@ UPDATE type::thing($id) MERGE $data;`}
     td: {
       borderBottom: '1px solid var(--border)', padding: '0.8rem'
     },
-    code: {
-      backgroundColor: 'var(--bg-secondary)', padding: '1rem', border: '1px solid var(--border)',
-      color: 'var(--text-secondary)', fontSize: '0.8rem', overflowX: 'auto', marginTop: '1rem'
-    },
-    bugBox: {
-      backgroundColor: 'rgba(255, 68, 68, 0.05)', borderLeft: '4px solid var(--error)',
-      padding: '1rem', marginTop: '1.5rem', fontSize: '0.85rem'
+    entry: {
+      padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)',
+      borderRadius: '4px'
     }
   };
 
   return (
     <div style={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div style={styles.container}>
-        <button onClick={onClose} style={styles.closeBtn}>[X]</button>
+        <button onClick={onClose} style={styles.closeBtn}>[ ESC_CLOSE ]</button>
         
         <aside style={styles.sidebar}>
-          <div style={{ color: 'var(--accent-green)', fontWeight: 'bold', marginBottom: '2rem', fontSize: '1.2rem', letterSpacing: '2px' }}>WIKI_CLI v1.2</div>
-          {pages.map(page => (
+          <div style={{ color: 'var(--accent-green)', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '1.1rem', letterSpacing: '1px' }}>SURBANAI_WIKI</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.6rem', marginBottom: '1.5rem' }}>v1.3.0_STABLE</div>
+          
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '0.3rem' }}>ACTIVE_CONTEXT:</div>
+          <select 
+            style={styles.projectSelect} 
+            value={currentScope} 
+            onChange={(e) => setCurrentScope(e.target.value)}
+          >
+            <option value="SurKAi">SurKAi (Global)</option>
+            {allProjects.map(p => (
+              <option key={p.name} value={p.name}>{p.name}</option>
+            ))}
+          </select>
+
+          {sections.map(section => (
             <div 
-              key={page.id} 
-              style={styles.navItem(activePage === page.id)}
-              onClick={() => setActivePage(page.id)}
+              key={section.id} 
+              style={styles.navItem(activePage === section.id)}
+              onClick={() => setActivePage(section.id)}
             >
-              <span>{page.icon}</span> {page.title}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flex: 1 }}>
+                <span>{section.icon}</span> {section.title}
+              </div>
+              {section.type !== 'meta' && (
+                <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>[{getCount(section.id)}]</span>
+              )}
             </div>
           ))}
-          <div style={{ marginTop: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>&gt; status: online</div>
+
+          <div style={{ marginTop: 'auto', padding: '1rem', border: '1px dashed var(--border)', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+            <div style={{ color: 'var(--accent-orange)', marginBottom: '0.3rem' }}>TERMINAL_STATUS:</div>
+            &gt; Live Queries: Active<br/>
+            &gt; Context: {currentScope}<br/>
+            &gt; User: {import.meta.env.VITE_SURREAL_USER || 'root'}
+          </div>
         </aside>
 
         <main style={styles.main}>
