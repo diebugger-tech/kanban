@@ -73,6 +73,64 @@ input, textarea, select {
 .logo-text:hover .ban { color: #61dafb; text-shadow: 0 0 8px rgba(97, 218, 251, 0.4); }
 .logo-text:hover .ai { color: #ffcc00; text-shadow: 0 0 8px rgba(255, 204, 0, 0.4); }
 
+/* TOAST NOTIFICATIONS */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2000;
+}
+
+.toast {
+  padding: 1rem 1.5rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  box-shadow: 5px 5px 15px var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+  min-width: 250px;
+}
+
+.toast.success { border-left: 4px solid var(--accent-green); }
+.toast.error { border-left: 4px solid var(--error); }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* SKELETON ANIMATIONS */
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+.skeleton {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-card {
+  height: 120px;
+  margin-bottom: 1rem;
+}
+
 @keyframes blink {
   50% { opacity: 0; }
 }
