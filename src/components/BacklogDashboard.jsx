@@ -31,17 +31,20 @@ export default function BacklogDashboard({ allProjects, wikiStats }) {
           <div style={styles.statVal}>{totalTasks}</div>
           <div style={styles.statLabel}>AUFGABEN</div>
         </div>
-      </div>
-
-      <div style={styles.manifest}>
-        <div style={{ ...styles.label, marginBottom: '0.5rem' }}>KAi_CORE_STATUS</div>
-        <div style={styles.logLine}>&gt; MEMORY_SYNC: OK</div>
-        <div style={styles.logLine}>&gt; SURREAL_DB: V2.3.10</div>
-        <div style={styles.logLine}>&gt; VECTOR_INDEX: ACTIVE</div>
+        <div style={styles.gridItem}>
+          <div style={{ ...styles.statVal, color: 'var(--accent-green)' }}>{totalDone}</div>
+          <div style={styles.statLabel}>ERLEDIGT</div>
+        </div>
+        <div style={styles.gridItem}>
+          <div style={{ ...styles.statVal, color: totalTasks - totalDone > 0 ? 'var(--accent-orange, #ffaa00)' : 'var(--text-muted)' }}>
+            {totalTasks - totalDone}
+          </div>
+          <div style={styles.statLabel}>OFFEN</div>
+        </div>
       </div>
 
       <div style={styles.tip}>
-        <span style={{ color: 'var(--accent-blue)' }}>TIP:</span> Use [T] for Todo-Panel
+        <span style={{ color: 'var(--accent-blue)' }}>TIP:</span> [T] Todo-Panel // [?] Wiki // [Ctrl+K] Search
       </div>
     </div>
   );
