@@ -50,3 +50,29 @@
 - [ ] Obsidian Vault → SurrealDB Bridge
 - [ ] TODOs in Obsidian → surbanai Karten
 - [ ] Kollektives AI-Gehirn via SurrealDB
+
+---
+
+## v1.3.1 — Bug Fixes & Refactoring _(2026-05-12)_
+- [x] **Doppelte `db.live('wiki')` Subscription gefixt** → `useWikiStats` Hook (Memory Leak)
+- [x] **`updated` Timestamp** via `time::now()` server-seitig (DetailPanel + Drag&Drop)
+- [x] **SDK-Response Normierung** in `useWikiStats`
+- [x] **SurrealDB Events Setup-Script** erstellt (`scripts/setup-db-events.surql`)
+- [ ] SurrealDB EVENT Script einmalig auf DB ausführen
+- [ ] **Reconnect-Logik** in `useSurrealDB` — exponential backoff bei DB-Ausfall
+
+## Neue Features (priorisiert)
+
+### Hoch
+- [ ] **Auto-Save im DetailPanel** — debounced 500ms, kein manuelles `[SAVE]` mehr
+- [ ] **Projekt-Archivierung** statt Hard Delete — `SET status = "archived"` + Archiv-Column
+- [ ] **Undo-Toast nach Delete** — 5s Fenster zum Rückgängigmachen
+
+### Mittel
+- [ ] **Bulk-Status-Change** — Shift+Klick mehrere Karten → gemeinsam Status ändern
+- [ ] **Projekt-Priorität** — `priority: 1–5` Feld + sortierbare Spalten
+- [ ] **`RELATE` für Abhängigkeiten** — `projekt:a →depends_on→ projekt:b` im DetailPanel
+
+### SurrealDB Native
+- [ ] **Multi-User Presence** — `LIVE SELECT` auf `presence`-Table, Avatare in Navbar
+- [ ] **Activity Feed** — `audit`-Table als Timeline-Sidebar
