@@ -12,11 +12,13 @@ export function useSurrealDB() {
   const [projects, setProjects] = useState([]);
   const [dbStatus, setDbStatus] = useState('CONNECTING...');
   const [dbError, setDbError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const liveQueryId = useRef(null);
 
   useEffect(() => {
     async function initDB() {
       try {
+        setLoading(true);
         setDbError(null);
         
         // Attempt connection
@@ -75,6 +77,8 @@ export function useSurrealDB() {
         } else {
           setDbStatus('OFFLINE');
         }
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -88,5 +92,5 @@ export function useSurrealDB() {
     };
   }, []);
 
-  return { projects, dbStatus, dbError };
+  return { projects, dbStatus, dbError, loading };
 }
