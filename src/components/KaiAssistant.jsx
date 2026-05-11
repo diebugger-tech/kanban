@@ -26,20 +26,51 @@ export default function KaiAssistant({ project }) {
       const response = await fetch('http://localhost:11434/api/generate', {
         method: 'POST',
         body: JSON.stringify({
-          model: 'qwen2.5:3b', // Optimized for local usage as per AGENTS.md
-          prompt: `You are KAi, a terminal-based AI project assistant. 
-          Current Project: ${project?.name || 'Global'}
-          Stack: ${project?.stack || 'N/A'}
-          Context: ${project?.desc || 'General dashboard'}
-          
-          User says: ${userMsg}`,
-          stream: false
+          model: 'qwen2.5:3b',
+          prompt: `You are KAi, a terminal-based AI project assistant.
+Current Project: ${project?.name || 'Global'}
+Stack: ${project?.stack || 'N/A'}
+Context: ${project?.desc || 'General dashboard'}
+
+User says: ${userMsg}`,
+          stream: true
         })
       });
-      const data = await response.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+
+      if (!response.body) throw new Error('No stream body');
+
+      // Add empty placeholder message that we'll fill progressively
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split('\n').filter(Boolean)) {
+          try {
+            const json = JSON.parse(line);
+            if (json.response) {
+              accumulated += json.response;
+              // Update the last message in place
+              setMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = { role: 'assistant', content: accumulated };
+                return updated;
+              });
+            }
+          } catch { /* partial JSON chunk, skip */ }
+        }
+      }
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'ERROR: Local AI instance (Ollama) unreachable. Ensure Ollama is running on port 11434.' }]);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'ERROR: Ollama unreachable on port 11434. Start with: ollama serve'
+      }]);
     } finally {
       setLoading(false);
     }
