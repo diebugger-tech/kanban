@@ -1,5 +1,5 @@
 {
-  "name": "surbanai",
+  "name": "surkai",
   "private": true,
   "version": "1.2.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "marked": "^18.0.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "surrealdb": "^2.0.3"
