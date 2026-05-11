@@ -1,6 +1,9 @@
 import React from 'react';
 
-export default function KanbanCard({ project, onDragStart, onDragEnd, onClick }) {
+export default function KanbanCard({ project, onDragStart, onDragEnd, onClick, wikiStats }) {
+  // Use project name as key to match wikiStats grouping in App.jsx
+  const stats = wikiStats[project.name] || { done: 0, total: 0 };
+  const progress = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
   const styles = {
     card: {
       backgroundColor: 'var(--bg-secondary)',
@@ -51,6 +54,31 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick })
       padding: '2px 6px',
       borderRadius: '2px',
       border: '1px solid var(--border)'
+    },
+    pulseContainer: {
+      marginTop: '1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.3rem'
+    },
+    pulseBar: {
+      height: '4px',
+      backgroundColor: 'var(--bg-tertiary)',
+      borderRadius: '2px',
+      overflow: 'hidden'
+    },
+    pulseFill: {
+      height: '100%',
+      backgroundColor: 'var(--accent-green)',
+      width: `${progress}%`,
+      transition: 'width 0.5s ease-out',
+      boxShadow: '0 0 10px rgba(0, 255, 170, 0.4)'
+    },
+    pulseText: {
+      fontSize: '0.6rem',
+      color: 'var(--text-muted)',
+      display: 'flex',
+      justifyContent: 'space-between'
     }
   };
 
@@ -58,7 +86,9 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick })
     <div
       style={styles.card}
       draggable
-      onDragStart={(e) => onDragStart(e, project.id)}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/plain', project.id.toString());
+      }}
       onDragEnd={onDragEnd}
       onClick={() => onClick(project.id)}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-green)'}
@@ -70,6 +100,16 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick })
       </div>
       <div style={styles.stack}>{project.stack}</div>
       <div style={styles.desc}>{project.desc}</div>
+      
+      <div style={styles.pulseContainer}>
+        <div style={styles.pulseText}>
+          <span>PROJECT_PULSE</span>
+          <span>{progress}%</span>
+        </div>
+        <div style={styles.pulseBar}>
+          <div style={styles.pulseFill} />
+        </div>
+      </div>
       <div style={styles.tagsContainer}>
         {Array.isArray(project.tags) && project.tags.map((tag, idx) => (
           <span key={idx} style={styles.tag}>{tag}</span>
