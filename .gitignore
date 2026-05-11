@@ -30,6 +30,7 @@ npm-debug.log*
 
 # Backups & Temp
 *.bak
+backup_*.surql
 knowledge/
 __pycache__/
 *.pyc
