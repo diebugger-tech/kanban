@@ -14,6 +14,28 @@ export default function WikiPanel({ projekt, onClose }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingEntry, setEditingEntry] = useState(null);
+
+  const TEMPLATES = {
+    architecture: {
+      titel: 'Architecture: [Name]',
+      inhalt: '## Architecture Overview\n\n```mermaid\ngraph TD\n  A[Component A] --> B[Component B]\n  B --> C[(SurrealDB)]\n```\n\n### Data Flow\n1. ...\n2. ...'
+    },
+    setup: {
+      titel: 'Setup: [Project]',
+      inhalt: '## Setup Instructions\n\n### Prerequisites\n- Node.js v20+\n- SurrealDB v2.x\n\n### Installation\n```bash\nnpm install\ncp .env.example .env\nnpm run dev\n```'
+    },
+    adr: {
+      titel: 'ADR: [Decision Title]',
+      inhalt: '# ADR: [Title]\n\n- **Date**: ' + new Date().toISOString().split('T')[0] + '\n- **Status**: Proposed\n- **Context**: \n- **Decision**: \n- **Consequences**: \n'
+    }
+  };
+
+  const applyTemplate = (key) => {
+    const tpl = TEMPLATES[key];
+    if (tpl) {
+      setEditingEntry(prev => ({ ...prev, titel: tpl.titel, inhalt: tpl.inhalt }));
+    }
+  };
   const [showNewModal, setShowNewModal] = useState(false);
 
   // Load all projects for the switcher (Live Sync)
@@ -187,6 +209,18 @@ export default function WikiPanel({ projekt, onClose }) {
                 <option value="todo">TODO</option>
                 <option value="system">SYSTEM</option>
               </select>
+              {!editingEntry.id && (
+                <select 
+                  style={{ ...styles.input, width: 'auto', border: '1px dashed var(--accent-blue)', color: 'var(--accent-blue)' }}
+                  onChange={e => applyTemplate(e.target.value)}
+                  defaultValue=""
+                >
+                  <option value="" disabled>SELECT_TEMPLATE</option>
+                  <option value="architecture">📐 ARCHITECTURE</option>
+                  <option value="setup">⚙️ SETUP</option>
+                  <option value="adr">💡 ADR</option>
+                </select>
+              )}
             </div>
           </div>
           
