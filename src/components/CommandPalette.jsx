@@ -5,9 +5,12 @@ export default function CommandPalette({ projects, onSelectProject, onClose }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef(null);
 
-  const filtered = projects.filter(p => 
-    p.name.toLowerCase().includes(query.toLowerCase()) ||
-    p.description?.toLowerCase().includes(query.toLowerCase())
+  const q = query.toLowerCase();
+  const filtered = projects.filter(p =>
+    p.name?.toLowerCase().includes(q) ||
+    p.description?.toLowerCase().includes(q) ||
+    p.stack?.toLowerCase().includes(q) ||
+    (Array.isArray(p.tags) && p.tags.some(t => t.toLowerCase().includes(q)))
   );
 
   useEffect(() => {
