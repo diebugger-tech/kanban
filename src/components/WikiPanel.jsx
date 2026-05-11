@@ -27,7 +27,7 @@ export default function WikiPanel({ onClose }) {
         return (
           <>
             <h2>🏠 Übersicht</h2>
-            <p>Willkommen bei <strong>SurKAi</strong> (surbanai) – deinem Echtzeit-Kanban-Dashboard powered by SurrealDB.</p>
+            <p>Willkommen bei <strong>surbanai</strong> – deinem Echtzeit-Kanban-Dashboard powered by SurrealDB.</p>
             <h3>🚀 Schnellstart</h3>
             <ul>
               <li>Projekte werden automatisch aus der SurrealDB geladen.</li>
@@ -69,7 +69,7 @@ export default function WikiPanel({ onClose }) {
         return (
           <>
             <h2>⌨️ Tastaturkürzel</h2>
-            <p>Effizientes Arbeiten mit SurKAi:</p>
+            <p>Effizientes Arbeiten mit surbanai:</p>
             <table style={styles.table}>
               <thead>
                 <tr><th style={styles.th}>Taste</th><th style={styles.th}>Aktion</th></tr>
@@ -98,7 +98,7 @@ export default function WikiPanel({ onClose }) {
         return (
           <>
             <h2>💾 SurrealDB API</h2>
-            <p>SurKAi nutzt die SurrealDB JavaScript SDK v2.x.</p>
+            <p>surbanai nutzt die SurrealDB JavaScript SDK v2.x.</p>
             <h3>Wichtige Queries:</h3>
             <pre style={styles.code}>
 {`// Projekte abrufen
