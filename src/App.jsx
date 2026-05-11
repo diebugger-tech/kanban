@@ -8,18 +8,30 @@ import Navbar from './components/Navbar';
 import WikiPanel from './components/WikiPanel';
 import TodoPanel from './components/TodoPanel';
 import CreateProjectModal from './components/CreateProjectModal';
+import TerminalLog from './components/TerminalLog';
+import CommandPalette from './components/CommandPalette';
+import KaiAssistant from './components/KaiAssistant';
+import ProjectHeader from './components/ProjectHeader';
 
 export default function App() {
   const { projects, dbStatus, dbError, loading: isLoading } = useSurrealDB();
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(() => 
+    localStorage.getItem('active_project_id')
+  );
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [toasts, setToasts] = useState([]);
   const [showWiki, setShowWiki] = useState(false);
   const [showTodo, setShowTodo] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [wikiStats, setWikiStats] = useState({});
 
-  // Der aktuell ausgewählte Projekt-Datensatz
-  const selectedProject = projects.find(p => p.id.toString() === selectedProjectId?.toString());
+  // Global logger function
+  const logEvent = (action, table, result, message) => {
+    window.dispatchEvent(new CustomEvent('surreal-log', {
+      detail: { action, table, result, message }
+    }));
+  };
 
   const showToast = (message, type = 'success') => {
     const id = Date.now();
@@ -29,19 +41,70 @@ export default function App() {
     }, 3000);
   };
 
+  // Persistence: Save active project
+  useEffect(() => {
+    if (selectedProjectId) {
+      localStorage.setItem('active_project_id', selectedProjectId);
+    } else {
+      localStorage.removeItem('active_project_id');
+    }
+  }, [selectedProjectId]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await db.query('SELECT count(typ = "todo" AND status = "done") as done, count(typ = "todo") as total, projekt FROM wiki GROUP BY projekt');
+        const stats = {};
+        const data = res[0]?.result || res[0] || [];
+        (Array.isArray(data) ? data : []).forEach(r => {
+          // Use project name as key for wikiStats to match KanbanCard usage
+          stats[r.projekt] = { done: r.done, total: r.total };
+        });
+        setWikiStats(stats);
+      } catch (err) {
+        console.error('Stats fetch failed', err);
+      }
+    };
+    fetchStats();
+    const unsub = db.live('wiki', fetchStats);
+    return () => {
+      unsub.then(u => u());
+    };
+  }, []);
+
+  useEffect(() => {
+    // Listen to DB live queries to log them
+    const unsubWiki = db.live('wiki', (res) => logEvent(res.action, 'wiki', res.result));
+    const unsubProj = db.live('projekt', (res) => logEvent(res.action, 'projekt', res.result));
+    
+    return () => {
+      unsubWiki.then(u => u());
+      unsubProj.then(u => u());
+    };
+  }, []);
+
+  // Der aktuell ausgewählte Projekt-Datensatz
+  const selectedProject = projects.find(p => p.id.toString() === selectedProjectId?.toString());
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette(prev => !prev);
+      }
       if (e.key === '?') {
         setShowWiki(prev => !prev);
+        logEvent('view', 'wiki', null, 'Wiki toggled');
       }
       if (e.key === 't' || e.key === 'T') {
         setShowTodo(prev => !prev);
+        logEvent('view', 'todo', null, 'Todo panel toggled');
       }
       if (e.key === 'Escape') {
         setShowWiki(false);
         setShowTodo(false);
         setShowCreateModal(false);
         setSelectedProjectId(null);
+        setShowCommandPalette(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -61,13 +124,13 @@ export default function App() {
     e.preventDefault();
     const id = e.dataTransfer.getData('text/plain');
     
-    // Safety check: ensure we have a valid ID and filter out potential browser-testing artifacts like 'drag'
     if (!id || id === 'drag') return;
 
     try {
-      await db.query('UPDATE type::thing($id) MERGE $data', {
+      // Use status field to match columns
+      await db.query('UPDATE type::thing($id) SET status = $status, updated = time::now()', {
         id,
-        data: { status, updated: new Date().toISOString() }
+        status
       });
       showToast('Project moved successfully', 'success');
     } catch (err) {
@@ -90,6 +153,12 @@ export default function App() {
 
       {dbError && <div style={{ backgroundColor: 'rgba(255, 68, 68, 0.1)', color: 'var(--error)', padding: '1rem', border: '1px solid var(--error)', marginBottom: '2rem' }}>Error: {dbError}</div>}
 
+      <ProjectHeader 
+        activeProject={selectedProject} 
+        onWikiOpen={() => setShowWiki(true)} 
+        onNotify={showToast}
+      />
+
       <main style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
         {COLUMNS.map(col => (
           <KanbanColumn
@@ -102,11 +171,25 @@ export default function App() {
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onCardClick={(id) => setSelectedProjectId(id)}
+            wikiStats={wikiStats}
           />
         ))}
       </main>
 
-      <footer style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.7rem', textAlign: 'center' }}>© 2026 ANDREAS BADER // sur·k·ai = surreal + kanban + ai // TERMINAL_UI</footer>
+      <KaiAssistant project={selectedProject} />
+
+      <footer style={{ marginTop: '4rem', marginBottom: '40px', color: 'var(--text-muted)', fontSize: '0.7rem', textAlign: 'center' }}>
+        © 2026 ANDREAS BADER // sur·k·ai = surreal + kanban + ai // TERMINAL_UI
+      </footer>
+      
+      <TerminalLog />
+      {showCommandPalette && (
+        <CommandPalette 
+          projects={projects} 
+          onSelectProject={setSelectedProjectId} 
+          onClose={() => setShowCommandPalette(false)}
+        />
+      )}
       
       <DetailPanel 
         projectId={selectedProjectId} 
@@ -129,6 +212,10 @@ export default function App() {
         isOpen={showCreateModal} 
         onClose={() => setShowCreateModal(false)} 
         onNotify={showToast}
+        onCreate={(proj) => {
+          setSelectedProjectId(proj.id);
+          setShowWiki(true);
+        }}
       />
 
       <div className="toast-container">
