@@ -1,7 +1,7 @@
 import React from 'react';
 import KanbanCard from './KanbanCard';
 
-export default function KanbanColumn({ column, projects, onDragStart, onDragEnd, onDragOver, onDrop, onCardClick }) {
+export default function KanbanColumn({ column, projects, isLoading, onDragStart, onDragEnd, onDragOver, onDrop, onCardClick }) {
   const styles = {
     column: {
       backgroundColor: 'var(--bg-secondary)',
@@ -9,7 +9,9 @@ export default function KanbanColumn({ column, projects, onDragStart, onDragEnd,
       borderRadius: '4px',
       padding: '1rem',
       minHeight: '600px',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      display: 'flex',
+      flexDirection: 'column'
     },
     columnHeader: {
       color: column.color,
@@ -27,6 +29,17 @@ export default function KanbanColumn({ column, projects, onDragStart, onDragEnd,
       padding: '2px 6px',
       borderRadius: '10px',
       border: '1px solid var(--border)'
+    },
+    emptyState: {
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      border: '1px dashed var(--border)',
+      borderRadius: '4px',
+      color: 'var(--text-muted)',
+      fontSize: '0.75rem',
+      userSelect: 'none'
     }
   };
 
@@ -38,17 +51,30 @@ export default function KanbanColumn({ column, projects, onDragStart, onDragEnd,
     >
       <div style={styles.columnHeader}>
         <span>⬤</span> {column.title}
-        <span style={styles.count}>{projects.length}</span>
+        <span style={styles.count}>{isLoading ? '...' : projects.length}</span>
       </div>
-      {projects.map(project => (
-        <KanbanCard
-          key={project.id.toString()}
-          project={project}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-          onClick={onCardClick}
-        />
-      ))}
+
+      {isLoading ? (
+        <>
+          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" />
+        </>
+      ) : projects.length > 0 ? (
+        projects.map(project => (
+          <KanbanCard
+            key={project.id.toString()}
+            project={project}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            onClick={onCardClick}
+          />
+        ))
+      ) : (
+        <div style={styles.emptyState}>
+          &gt; NO TASKS
+        </div>
+      )}
     </div>
   );
 }
