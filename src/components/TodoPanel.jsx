@@ -189,6 +189,21 @@ export default function TodoPanel({ onClose }) {
             ))}
           </div>
 
+          <div style={{ padding: '0.8rem 1rem 0.4rem 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+              <span>PROJECT_PROGRESS</span>
+              <span>{Math.round((todos.filter(t => t.status === 'done').length / (todos.length || 1)) * 100)}%</span>
+            </div>
+            <div style={{ height: '4px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ 
+                height: '100%', 
+                backgroundColor: 'var(--accent-green)', 
+                width: `${(todos.filter(t => t.status === 'done').length / (todos.length || 1)) * 100}%`,
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+          </div>
+
           <div style={styles.list}>
             {filteredTodos.map(todo => (
               <div key={todo.id} style={styles.todoItem}>
