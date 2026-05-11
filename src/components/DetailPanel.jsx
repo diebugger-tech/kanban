@@ -2,23 +2,41 @@ import React, { useState, useEffect } from 'react';
 import db from '../lib/db';
 import { COLUMNS } from '../constants';
 
-export default function DetailPanel({ projectId, isOpen, onClose, onNotify }) {
+export default function DetailPanel({ projectId, projects = [], isOpen, onClose, onSelectProject, onNotify }) {
   const [data, setData] = useState(null);
   const [formData, setFormData] = useState({ desc: '', tags: '', status: '', cmd_start: '', cmd_stop: '' });
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(null);
 
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (showConfirmDelete) setShowConfirmDelete(false);
+        else onClose();
+      }
+      
+      if (isOpen && projects.length > 0 && !showConfirmDelete) {
+        const currentIndex = projects.findIndex(p => p.id.toString() === projectId?.toString());
+        if (e.key.toLowerCase() === 'j') {
+          const nextIndex = (currentIndex + 1) % projects.length;
+          onSelectProject(projects[nextIndex].id);
+        }
+        if (e.key.toLowerCase() === 'k') {
+          const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
+          onSelectProject(projects[prevIndex].id);
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isOpen, projects, projectId, onSelectProject, showConfirmDelete]);
 
   useEffect(() => {
     if (isOpen && projectId) {
       setLoading(true);
+      setShowConfirmDelete(false); // Reset confirmation when switching projects
       db.query(`SELECT * FROM ${projectId.toString()}`)
         .then(res => {
           if (res && res[0] && res[0][0]) {
@@ -61,6 +79,18 @@ export default function DetailPanel({ projectId, isOpen, onClose, onNotify }) {
     } catch (err) {
       console.error('Update failed:', err);
       onNotify('Save failed', 'error');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!projectId) return;
+    try {
+      await db.query('DELETE type::thing($id)', { id: projectId.toString() });
+      onNotify('Project deleted', 'success');
+      onClose();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      onNotify('Delete failed', 'error');
     }
   };
 
@@ -114,6 +144,11 @@ export default function DetailPanel({ projectId, isOpen, onClose, onNotify }) {
       backgroundColor: 'var(--accent-blue)', color: 'var(--bg-primary)', border: 'none',
       padding: '0.8rem', fontWeight: 'bold', cursor: 'pointer',
       fontFamily: 'inherit'
+    },
+    deleteBtn: {
+      marginTop: '1rem', backgroundColor: 'transparent', color: 'var(--error)', 
+      border: '1px solid var(--error)', padding: '0.6rem', cursor: 'pointer',
+      fontFamily: 'inherit', opacity: 0.7, transition: 'all 0.2s'
     },
     terminalBox: {
       marginTop: '1rem', backgroundColor: 'var(--bg-primary)', padding: '1rem',
@@ -198,6 +233,33 @@ export default function DetailPanel({ projectId, isOpen, onClose, onNotify }) {
             </div>
             
             <button style={styles.saveBtn} onClick={handleSave}>[ SAVE CHANGES ]</button>
+
+            {!showConfirmDelete ? (
+              <button 
+                style={styles.deleteBtn} 
+                onClick={() => setShowConfirmDelete(true)}
+              >
+                [ DELETE PROJECT ]
+              </button>
+            ) : (
+              <div style={{ marginTop: '1rem', border: '1px solid var(--error)', padding: '1rem', textAlign: 'center' }}>
+                <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginBottom: '1rem' }}>CONFIRM_DELETION? THIS_ACTION_IS_PERMANENT.</div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button 
+                    style={{ ...styles.actionBtn('var(--error)'), flex: 2 }} 
+                    onClick={handleDelete}
+                  >
+                    [ YES, DELETE ]
+                  </button>
+                  <button 
+                    style={{ ...styles.actionBtn('var(--bg-secondary)'), color: 'var(--text-primary)', flex: 1, border: '1px solid var(--border)' }} 
+                    onClick={() => setShowConfirmDelete(false)}
+                  >
+                    [ CANCEL ]
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div style={{ 
               marginTop: '1.5rem', 
