@@ -1,4 +1,4 @@
-# surbanai
+# SurKAi
 
 ![SurrealDB](https://img.shields.io/badge/SurrealDB-2.x-ff00a0?style=for-the-badge&logo=surrealdb)
 ![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
@@ -40,8 +40,8 @@ Works on any Linux, macOS, or Windows WSL2.
    curl -sSf https://install.surrealdb.com | sh
 
 2. Clone and run:
-   git clone https://github.com/diebugger-tech/surbanai
-   cd surbanai
+   git clone https://github.com/diebugger-tech/SurKAi
+   cd SurKAi
    cp .env.example .env
    npm install
    surreal start --bind 127.0.0.1:8000 --user root --pass root surrealkv://./data &
@@ -96,7 +96,7 @@ Surrealist (official GUI): https://surrealist.app
 ## Contributing
 
 Contributions welcome! See CONTRIBUTING.md
-Open an issue: https://github.com/diebugger-tech/surbanai/issues
+Open an issue: https://github.com/diebugger-tech/SurKAi/issues
 
 ---
 
