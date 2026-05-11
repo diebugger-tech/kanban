@@ -2,11 +2,19 @@ import React, { useState, useEffect } from 'react';
 import db from '../lib/db';
 import { COLUMNS } from '../constants';
 
-export default function DetailPanel({ projectId, isOpen, onClose }) {
+export default function DetailPanel({ projectId, isOpen, onClose, onNotify }) {
   const [data, setData] = useState(null);
   const [formData, setFormData] = useState({ desc: '', tags: '', status: '', cmd_start: '', cmd_stop: '' });
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   useEffect(() => {
     if (isOpen && projectId) {
@@ -25,10 +33,13 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
             });
           }
         })
-        .catch(err => console.error('Error fetching detail:', err))
+        .catch(err => {
+          console.error('Error fetching detail:', err);
+          onNotify('Failed to load project data', 'error');
+        })
         .finally(() => setLoading(false));
     }
-  }, [isOpen, projectId]);
+  }, [isOpen, projectId, onNotify]);
 
   const handleSave = async () => {
     if (!projectId) return;
@@ -45,9 +56,11 @@ export default function DetailPanel({ projectId, isOpen, onClose }) {
           updated: new Date().toISOString()
         }
       });
+      onNotify('Changes saved');
       onClose();
     } catch (err) {
       console.error('Update failed:', err);
+      onNotify('Save failed', 'error');
     }
   };
 
