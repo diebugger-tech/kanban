@@ -126,6 +126,7 @@ export default function TodoPanel({ onClose }) {
   const filteredTodos = filter === 'alle' ? todos : todos.filter(t => t.projekt === filter);
 
   const styles = {
+    panel: {
       position: 'fixed', left: pos.x, top: pos.y,
       width: '300px', maxHeight: '500px',
       backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
@@ -133,6 +134,7 @@ export default function TodoPanel({ onClose }) {
       display: 'flex', flexDirection: 'column',
       fontFamily: 'monospace',
       transition: dragging ? 'none' : 'all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28)',
+    },
     header: {
       padding: '0.8rem 1rem', borderBottom: '1px solid var(--border)',
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
