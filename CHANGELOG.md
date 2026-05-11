@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-05-11
+### Added
+- Integrated Wiki/Help Panel with sidebar navigation
+- Keyboard Shortcuts (? for Wiki, ESC to close panels)
+- Toast Notifications for save/error actions
+- Loading Skeleton animations for DB connection
+- Terminal-style empty column placeholders (> NO TASKS)
+
+### Changed
+- Refactored header into modular Navbar component
+- Improved Drag & Drop reliability with RecordID safety check
+
 ## [1.2.0] - 2026-05-10
 ### Added
 - Dark/Light Theme Toggle (thanks @Keerthi7423)
