@@ -6,35 +6,48 @@ export default function WikiPanel({ projekt, onClose }) {
   const [activePage, setActivePage] = useState('doc');
   const [entries, setEntries] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
-  const [currentScope, setCurrentScope] = useState(projekt?.name || 'SurKAi');
+  const [currentScope, setCurrentScope] = useState(projekt?.name || 'GLOBAL');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingEntry, setEditingEntry] = useState(null);
   const [showNewModal, setShowNewModal] = useState(false);
 
-  // Load all projects for the switcher
+  // Load all projects for the switcher (Live Sync)
   useEffect(() => {
-    const fetchProjects = async () => {
+    const loadProjects = async () => {
       try {
         const res = await db.query('SELECT name FROM projekt ORDER BY name ASC');
         const data = res[0]?.result || res[0] || [];
-        setAllProjects(data);
+        setAllProjects(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to fetch projects for wiki:', err);
       }
     };
-    fetchProjects();
+
+    loadProjects();
+    const unsub = db.live('projekt', () => loadProjects());
+    return () => unsub.then(u => u());
   }, []);
+
+  // Sync currentScope when projekt prop changes (e.g. from DetailPanel context)
+  useEffect(() => {
+    if (projekt?.name) {
+      setCurrentScope(projekt.name);
+    }
+  }, [projekt]);
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      // Fetch both project-specific entries and global system entries
-      const result = await db.query(
-        'SELECT * FROM wiki WHERE projekt = $name OR typ = "system" ORDER BY erstellt DESC',
-        { name: currentScope }
-      );
-      setEntries(result[0] ?? []);
+      // Fetch based on scope: if GLOBAL show everything, else project + system
+      const query = currentScope === 'GLOBAL' 
+        ? 'SELECT * FROM wiki ORDER BY erstellt DESC'
+        : 'SELECT * FROM wiki WHERE projekt = $name OR typ = "system" ORDER BY erstellt DESC';
+        
+      const res = await db.query(query, { name: currentScope });
+      
+      const data = res[0]?.result || res[0] || [];
+      setEntries(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Wiki load failed:', err);
     } finally {
@@ -45,26 +58,37 @@ export default function WikiPanel({ projekt, onClose }) {
   useEffect(() => {
     load();
     const unsub = db.live('wiki', ({ action, result }) => {
-      if (result.projekt === currentScope || result.typ === 'system') load();
+      if (currentScope === 'GLOBAL' || result.projekt === currentScope || result.typ === 'system') load();
     });
     return () => unsub.then(u => u());
   }, [load, currentScope]);
 
   const handleSaveEntry = async (entry) => {
     try {
+      const data = {
+        titel: entry.titel,
+        inhalt: entry.inhalt,
+        typ: entry.typ,
+        geaendert: new Date().toISOString()
+      };
+
       if (entry.id) {
-        await db.merge(entry.id, {
+        await db.query('UPDATE $id MERGE $data', { id: entry.id, data });
+      } else {
+        await db.query(`
+          CREATE wiki SET 
+            titel = $titel, 
+            inhalt = $inhalt, 
+            projekt = $projekt, 
+            typ = $typ, 
+            status = "open",
+            erstellt = time::now(), 
+            geaendert = time::now()
+        `, {
           titel: entry.titel,
           inhalt: entry.inhalt,
-          geaendert: new Date().toISOString()
-        });
-      } else {
-        await db.create('wiki', {
-          ...entry,
           projekt: entry.typ === 'system' ? 'Global' : currentScope,
-          status: 'open',
-          erstellt: new Date().toISOString(),
-          geaendert: new Date().toISOString()
+          typ: entry.typ
         });
       }
       setEditingEntry(null);
@@ -72,6 +96,7 @@ export default function WikiPanel({ projekt, onClose }) {
       load();
     } catch (err) {
       console.error('Save entry failed:', err);
+      alert(`SAVE_FAILED: ${err.message}`);
     }
   };
 
@@ -90,16 +115,20 @@ export default function WikiPanel({ projekt, onClose }) {
     { id: 'todo', title: 'TODOs', icon: '✅', type: 'project' },
     { id: 'shortcuts', title: 'Shortcuts', icon: '⌨️', type: 'meta' },
   ];
-
   const getCount = (sectionId) => {
-    const filtered = entries.filter(e => {
+    return entries.filter(e => {
       const matchesSearch = e.titel.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            e.inhalt.toLowerCase().includes(searchQuery.toLowerCase());
       if (!matchesSearch) return false;
-      if (sectionId === 'system') return e.typ === 'system';
-      return e.typ === sectionId && e.projekt === currentScope;
-    });
-    return filtered.length;
+      
+      // Shortcuts are special: they are just docs with "shortcut" in the title
+      if (sectionId === 'shortcuts') return e.titel.toLowerCase().includes('shortcut');
+      
+      // Filter by type and scope
+      const typeMatches = e.typ === sectionId;
+      const scopeMatches = currentScope === 'GLOBAL' || e.projekt === currentScope;
+      return typeMatches && scopeMatches;
+    }).length;
   };
 
   const renderMarkdown = (content) => {
@@ -158,14 +187,16 @@ export default function WikiPanel({ projekt, onClose }) {
       );
     }
 
-    if (activePage === 'shortcuts') {
-...
     const filtered = entries.filter(e => {
       const matchesSearch = e.titel.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            e.inhalt.toLowerCase().includes(searchQuery.toLowerCase());
       if (!matchesSearch) return false;
-      if (activePage === 'system') return e.typ === 'system';
-      return e.typ === activePage && e.projekt === currentScope;
+      
+      if (activePage === 'shortcuts') return e.titel.toLowerCase().includes('shortcut');
+      
+      const typeMatches = e.typ === activePage;
+      const scopeMatches = currentScope === 'GLOBAL' || e.projekt === currentScope;
+      return typeMatches && scopeMatches;
     });
 
     return (
@@ -252,6 +283,31 @@ export default function WikiPanel({ projekt, onClose }) {
     main: {
       flex: 1, padding: '3rem', overflowY: 'auto', color: 'var(--text-primary)',
       backgroundColor: 'var(--bg-primary)'
+    },
+    manifestSidebar: {
+      marginTop: '2rem',
+      padding: '0.5rem',
+      backgroundColor: 'rgba(0, 255, 170, 0.02)',
+      border: '1px solid var(--border)',
+      borderRadius: '2px',
+      fontSize: '0.7rem'
+    },
+    manifestRow: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '0.3rem',
+      gap: '0.5rem'
+    },
+    manifestKey: {
+      color: 'var(--text-muted)',
+      fontWeight: 'bold'
+    },
+    snippet: {
+      backgroundColor: 'var(--bg-tertiary)',
+      padding: '1px 3px',
+      borderRadius: '2px',
+      color: 'var(--accent-green)',
+      fontSize: '0.65rem'
     },
     navItem: (active) => ({
       padding: '0.8rem 1rem', cursor: 'pointer', borderLeft: '3px solid transparent',
@@ -347,6 +403,7 @@ export default function WikiPanel({ projekt, onClose }) {
             value={currentScope} 
             onChange={(e) => setCurrentScope(e.target.value)}
           >
+            <option value="GLOBAL">--- ALLE PROJEKTE ---</option>
             <option value="SurKAi">SurKAi (Global)</option>
             {allProjects.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
@@ -393,6 +450,27 @@ export default function WikiPanel({ projekt, onClose }) {
             &gt; Context: {currentScope}<br/>
             &gt; User: {import.meta.env.VITE_SURREAL_USER || 'root'}
           </div>
+          {projekt?.manifest && (
+            <div style={styles.manifestSidebar}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.2rem', marginTop: '1rem' }}>SYSTEM_MANIFEST</div>
+              <div style={styles.manifestRow}>
+                <span style={styles.manifestKey}>stack</span>
+                <span style={{ color: 'var(--text-primary)' }}>{projekt.manifest.stack?.framework} / {projekt.manifest.stack?.db}</span>
+              </div>
+              <div style={styles.manifestRow}>
+                <span style={styles.manifestKey}>port</span>
+                <span style={{ color: 'var(--text-primary)' }}>:{projekt.manifest.ports?.dev}</span>
+              </div>
+              <div style={styles.manifestRow}>
+                <span style={styles.manifestKey}>entry</span>
+                <span style={{ color: 'var(--text-primary)' }}>{projekt.manifest.entry}</span>
+              </div>
+              <div style={styles.manifestRow}>
+                <span style={styles.manifestKey}>start</span>
+                <code style={styles.snippet}>{projekt.manifest.start}</code>
+              </div>
+            </div>
+          )}
         </aside>
 
         <main style={styles.main}>
