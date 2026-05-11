@@ -13,8 +13,9 @@ export default function WikiPanel({ projekt, onClose }) {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await db.query('SELECT name FROM projects ORDER BY name ASC');
-        setAllProjects(res[0] || []);
+        const res = await db.query('SELECT name FROM projekt ORDER BY name ASC');
+        const data = res[0]?.result || res[0] || [];
+        setAllProjects(data);
       } catch (err) {
         console.error('Failed to fetch projects for wiki:', err);
       }
@@ -40,8 +41,8 @@ export default function WikiPanel({ projekt, onClose }) {
 
   useEffect(() => {
     load();
-    const unsub = db.live('wiki', (action, record) => {
-      if (record.projekt === currentScope || record.typ === 'system') load();
+    const unsub = db.live('wiki', ({ action, result }) => {
+      if (result.projekt === currentScope || result.typ === 'system') load();
     });
     return () => unsub.then(u => u());
   }, [load, currentScope]);

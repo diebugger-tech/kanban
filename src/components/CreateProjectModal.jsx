@@ -27,7 +27,7 @@ export default function CreateProjectModal({ isOpen, onClose, onNotify }) {
 
     setLoading(true);
     try {
-      await db.create('projects', {
+      await db.create('projekt', {
         ...formData,
         tags: [],
         erstellt: new Date().toISOString(),
