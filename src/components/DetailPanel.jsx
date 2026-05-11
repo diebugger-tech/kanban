@@ -63,17 +63,24 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
     if (!projectId) return;
     try {
       const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
-      await db.query(`UPDATE type::thing($id) MERGE $data`, {
-        id: projectId.toString(),
-        data: {
+      // time::now() is evaluated server-side — avoids client/server clock skew
+      await db.query(
+        `UPDATE type::thing($id) SET
+          desc = $desc,
+          tags = $tags,
+          status = $status,
+          cmd_start = $cmd_start,
+          cmd_stop = $cmd_stop,
+          updated = time::now()`,
+        {
+          id: projectId.toString(),
           desc: formData.desc,
           tags: tagsArray,
           status: formData.status,
           cmd_start: formData.cmd_start,
           cmd_stop: formData.cmd_stop,
-          updated: new Date().toISOString()
         }
-      });
+      );
       onNotify('Changes saved');
       onClose();
     } catch (err) {
