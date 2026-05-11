@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSurrealDB } from './hooks/useSurrealDB';
+import { useWikiStats } from './hooks/useWikiStats';
 import { COLUMNS } from './constants';
 import db from './lib/db';
 import KanbanColumn from './components/KanbanColumn';
@@ -24,7 +25,9 @@ export default function App() {
   const [showTodo, setShowTodo] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [wikiStats, setWikiStats] = useState({});
+
+  // Single wiki live subscription via dedicated hook (fixes double-subscription bug)
+  const wikiStats = useWikiStats((res) => logEvent(res.action, 'wiki', res.result));
 
   // Global logger function
   const logEvent = (action, table, result, message) => {
@@ -50,35 +53,10 @@ export default function App() {
     }
   }, [selectedProjectId]);
 
+  // Projekt live subscription for terminal logging (wiki logging is handled by useWikiStats)
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await db.query('SELECT count(typ = "todo" AND status = "done") as done, count(typ = "todo") as total, projekt FROM wiki GROUP BY projekt');
-        const stats = {};
-        const data = res[0]?.result || res[0] || [];
-        (Array.isArray(data) ? data : []).forEach(r => {
-          // Use project name as key for wikiStats to match KanbanCard usage
-          stats[r.projekt] = { done: r.done, total: r.total };
-        });
-        setWikiStats(stats);
-      } catch (err) {
-        console.error('Stats fetch failed', err);
-      }
-    };
-    fetchStats();
-    const unsub = db.live('wiki', fetchStats);
-    return () => {
-      unsub.then(u => u());
-    };
-  }, []);
-
-  useEffect(() => {
-    // Listen to DB live queries to log them
-    const unsubWiki = db.live('wiki', (res) => logEvent(res.action, 'wiki', res.result));
     const unsubProj = db.live('projekt', (res) => logEvent(res.action, 'projekt', res.result));
-    
     return () => {
-      unsubWiki.then(u => u());
       unsubProj.then(u => u());
     };
   }, []);
@@ -131,6 +109,7 @@ export default function App() {
 
     try {
       // Use status field to match columns
+      // time::now() delegated to SurrealDB — avoids client/server clock skew
       await db.query('UPDATE type::thing($id) SET status = $status, updated = time::now()', {
         id,
         status
