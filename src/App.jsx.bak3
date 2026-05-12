@@ -13,7 +13,6 @@ import TerminalLog from './components/TerminalLog';
 import CommandPalette from './components/CommandPalette';
 import KaiAssistant from './components/KaiAssistant';
 import ProjectHeader from './components/ProjectHeader';
-import ObsidianSync from './components/ObsidianSync';
 
 export default function App() {
   const { projects, dbStatus, dbError, loading: isLoading } = useSurrealDB();
@@ -27,7 +26,6 @@ export default function App() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [selectedWikiEntry, setSelectedWikiEntry] = useState(null);
-  const [showObsidianSync, setShowObsidianSync] = useState(false);
 
   // Single wiki live subscription via dedicated hook (fixes double-subscription bug)
   const wikiStats = useWikiStats((res) => logEvent(res.action, 'wiki', res.result));
@@ -139,7 +137,6 @@ export default function App() {
         onWikiOpen={() => setShowWiki(true)} 
         onTodoOpen={() => setShowTodo(true)}
         onCreateOpen={() => setShowCreateModal(true)}
-        onObsidianSync={() => setShowObsidianSync(true)}
         showToast={showToast}
       />
 
@@ -194,13 +191,6 @@ export default function App() {
         />
       )}
       {showTodo && <TodoPanel onClose={() => setShowTodo(false)} />}
-      
-      {showObsidianSync && (
-        <ObsidianSync
-          onClose={() => setShowObsidianSync(false)}
-          onNotify={showToast}
-        />
-      )}
       
       <CreateProjectModal 
         isOpen={showCreateModal} 

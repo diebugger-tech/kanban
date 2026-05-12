@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import db from '../lib/db';
 import { COLUMNS } from '../constants';
 
@@ -7,8 +7,7 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
   const [formData, setFormData] = useState({ desc: '', tags: '', status: '', cmd_start: '', cmd_stop: '' });
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(null);
-  const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | 'saving' | 'saved' | 'error'
-  const isDirty = useRef(false); // tracks whether form has unsaved changes
+
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -37,9 +36,7 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
   useEffect(() => {
     if (isOpen && projectId) {
       setLoading(true);
-      setShowConfirmDelete(false);
-      isDirty.current = false; // reset dirty flag when switching projects
-      setAutoSaveStatus(null);
+      setShowConfirmDelete(false); // Reset confirmation when switching projects
       db.query(`SELECT * FROM ${projectId.toString()}`)
         .then(res => {
           if (res && res[0] && res[0][0]) {
@@ -62,34 +59,11 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
     }
   }, [isOpen, projectId, onNotify]);
 
-  // Auto-save: debounced 500ms, fires only when form is dirty
-  useEffect(() => {
-    if (!isDirty.current || !projectId) return;
-    const timer = setTimeout(async () => {
-      setAutoSaveStatus('saving');
-      try {
-        const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
-        await db.query(
-          `UPDATE type::thing($id) SET
-            desc = $desc, tags = $tags, status = $status,
-            cmd_start = $cmd_start, cmd_stop = $cmd_stop,
-            updated = time::now()`,
-          { id: projectId.toString(), desc: formData.desc, tags: tagsArray,
-            status: formData.status, cmd_start: formData.cmd_start, cmd_stop: formData.cmd_stop }
-        );
-        setAutoSaveStatus('saved');
-        setTimeout(() => setAutoSaveStatus(null), 2000);
-      } catch {
-        setAutoSaveStatus('error');
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [formData, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     if (!projectId) return;
     try {
       const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+      // time::now() is evaluated server-side — avoids client/server clock skew
       await db.query(
         `UPDATE type::thing($id) SET
           desc = $desc,
@@ -107,13 +81,13 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
           cmd_stop: formData.cmd_stop,
         }
       );
-      isDirty.current = false;
       onNotify('Changes saved');
+      onClose();
     } catch (err) {
       console.error('Update failed:', err);
       onNotify('Save failed', 'error');
     }
-  }, [formData, projectId, onNotify]);
+  };
 
   const handleDelete = async () => {
     if (!projectId) return;
@@ -207,42 +181,29 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={styles.label()}>&#62; DESCRIPTION</label>
-              <textarea
-                value={formData.desc}
-                onChange={e => { isDirty.current = true; setFormData({ ...formData, desc: e.target.value }); }}
-                style={styles.textarea}
-              />
+              <label style={styles.label()}>&gt; DESCRIPTION</label>
+              <textarea value={formData.desc} onChange={e => setFormData({ ...formData, desc: e.target.value })} style={styles.textarea} />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={styles.label()}>&#62; TAGS (comma separated)</label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={e => { isDirty.current = true; setFormData({ ...formData, tags: e.target.value }); }}
-                style={styles.input}
-              />
+              <label style={styles.label()}>&gt; TAGS (comma separated)</label>
+              <input type="text" value={formData.tags} onChange={e => setFormData({ ...formData, tags: e.target.value })} style={styles.input} />
             </div>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label style={styles.label()}>&#62; START CMD</label>
-                <input type="text" value={formData.cmd_start} onChange={e => { isDirty.current = true; setFormData({ ...formData, cmd_start: e.target.value }); }} style={styles.input} />
+                <label style={styles.label()}>&gt; START CMD</label>
+                <input type="text" value={formData.cmd_start} onChange={e => setFormData({ ...formData, cmd_start: e.target.value })} style={styles.input} />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label style={styles.label('var(--error)')}>&#62; STOP CMD</label>
-                <input type="text" value={formData.cmd_stop} onChange={e => { isDirty.current = true; setFormData({ ...formData, cmd_stop: e.target.value }); }} style={styles.input} />
+                <label style={styles.label('var(--error)')}>&gt; STOP CMD</label>
+                <input type="text" value={formData.cmd_stop} onChange={e => setFormData({ ...formData, cmd_stop: e.target.value })} style={styles.input} />
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={styles.label()}>&#62; STATUS</label>
-              <select
-                value={formData.status}
-                onChange={e => { isDirty.current = true; setFormData({ ...formData, status: e.target.value }); }}
-                style={{ ...styles.input, cursor: 'pointer' }}
-              >
+              <label style={styles.label()}>&gt; STATUS</label>
+              <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} style={{ ...styles.input, cursor: 'pointer' }}>
                 {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
               </select>
             </div>
@@ -278,25 +239,7 @@ export default function DetailPanel({ projectId, projects = [], isOpen, onClose,
               </button>
             </div>
             
-            {/* Auto-save indicator + manual save fallback */}
-            <button
-              style={{
-                ...styles.saveBtn,
-                backgroundColor:
-                  autoSaveStatus === 'saving' ? 'rgba(0,255,170,0.1)' :
-                  autoSaveStatus === 'saved'  ? 'var(--accent-green)' :
-                  autoSaveStatus === 'error'  ? 'var(--error)' :
-                  'var(--accent-blue)',
-                color: autoSaveStatus === 'saved' ? 'var(--bg-primary)' : autoSaveStatus === 'saving' ? 'var(--accent-green)' : 'var(--bg-primary)',
-                transition: 'background 0.3s, color 0.3s',
-              }}
-              onClick={handleSave}
-            >
-              {autoSaveStatus === 'saving' ? '[ AUTO_SAVING... ]' :
-               autoSaveStatus === 'saved'  ? '[ ✓ SAVED ]' :
-               autoSaveStatus === 'error'  ? '[ SAVE FAILED — RETRY ]' :
-               '[ SAVE NOW ]'}
-            </button>
+            <button style={styles.saveBtn} onClick={handleSave}>[ SAVE CHANGES ]</button>
 
             {!showConfirmDelete ? (
               <button 
