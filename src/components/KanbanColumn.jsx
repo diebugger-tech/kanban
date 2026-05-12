@@ -1,9 +1,46 @@
-import React, { useState } from 'react';
+import React from 'react';
 import KanbanCard from './KanbanCard';
 import BacklogDashboard from './BacklogDashboard';
 
-export default function KanbanColumn({ column, projects, isLoading, onDragStart, onDragEnd, onDragOver, onDrop, onCardClick, wikiStats, allProjects }) {
-  const [isOver, setIsOver] = useState(false);
+// Ghost slide-in animation — injected once into the document head
+if (typeof document !== 'undefined' && !document.getElementById('ghost-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'ghost-keyframes';
+  style.textContent = `
+    @keyframes ghostSlideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+const ghostStyle = {
+  height: '80px',
+  border: '1.5px dashed var(--accent-green)',
+  borderRadius: '8px',
+  background: 'rgba(29,158,117,0.06)',
+  margin: '4px 0',
+  transition: 'all 0.15s ease',
+  animation: 'ghostSlideIn 0.1s ease',
+  pointerEvents: 'none',
+};
+
+export default function KanbanColumn({
+  column,
+  projects,
+  isLoading,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
+  onCardClick,
+  wikiStats,
+  dropTarget,
+}) {
+  const isOver = dropTarget?.spalte === column.id;
+
   const styles = {
     column: {
       backgroundColor: 'var(--bg-secondary)',
@@ -13,7 +50,7 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
       minHeight: '600px',
       flexDirection: 'column',
       boxShadow: isOver ? `0 0 15px ${column.color}` : 'none',
-      borderColor: isOver ? column.color : 'var(--border)'
+      borderColor: isOver ? column.color : 'var(--border)',
     },
     columnHeader: {
       color: column.color,
@@ -22,7 +59,7 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
       marginBottom: '1.5rem',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '0.5rem',
     },
     count: {
       fontSize: '0.7rem',
@@ -30,7 +67,7 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
       backgroundColor: 'var(--bg-primary)',
       padding: '2px 6px',
       borderRadius: '10px',
-      border: '1px solid var(--border)'
+      border: '1px solid var(--border)',
     },
     emptyState: {
       flex: 1,
@@ -41,20 +78,17 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
       borderRadius: '4px',
       color: 'var(--text-muted)',
       fontSize: '0.75rem',
-      userSelect: 'none'
-    }
+      userSelect: 'none',
+    },
   };
 
   return (
     <div
+      data-spalte={column.id}
       style={styles.column}
-      onDragOver={onDragOver}
-      onDragEnter={() => setIsOver(true)}
-      onDragLeave={() => setIsOver(false)}
-      onDrop={(e) => {
-        setIsOver(false);
-        onDrop(e, column.id);
-      }}
+      onDragOver={(e) => onDragOver(e, column.id, e.clientY)}
+      onDragLeave={onDragLeave}
+      onDrop={(e) => onDrop(e, column.id)}
     >
       <div style={styles.columnHeader}>
         <span>⬤</span> {column.title}
@@ -67,23 +101,39 @@ export default function KanbanColumn({ column, projects, isLoading, onDragStart,
           <div className="skeleton skeleton-card" />
           <div className="skeleton skeleton-card" />
         </>
-      ) : projects.length > 0 ? (
-        projects.map(project => (
-          <KanbanCard
-            key={project.id.toString()}
-            project={project}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onClick={onCardClick}
-            wikiStats={wikiStats}
-          />
-        ))
-      ) : column.id === 'backlog' ? (
-        <BacklogDashboard allProjects={allProjects || []} wikiStats={wikiStats || {}} />
       ) : (
-        <div style={styles.emptyState}>
-          &gt; NO TASKS
-        </div>
+        <>
+          {projects.map((project, i) => (
+            <React.Fragment key={project.id.toString()}>
+              {/* Ghost indicator BEFORE this card */}
+              {dropTarget?.spalte === column.id && dropTarget?.index === i && (
+                <div style={ghostStyle} aria-hidden="true" />
+              )}
+              <KanbanCard
+                project={project}
+                onDragStart={onDragStart}
+                onDragEnd={onDragEnd}
+                onClick={onCardClick}
+                wikiStats={wikiStats}
+              />
+            </React.Fragment>
+          ))}
+
+          {/* Ghost at end of list (or in empty column) */}
+          {dropTarget?.spalte === column.id &&
+            dropTarget?.index === projects.length && (
+              <div style={ghostStyle} aria-hidden="true" />
+            )}
+
+          {/* Empty state — shown only when no ghost is active */}
+          {projects.length === 0 && !isOver && (
+            column.id === 'backlog' ? (
+              <BacklogDashboard wikiStats={wikiStats || {}} />
+            ) : (
+              <div style={styles.emptyState}>&gt; NO TASKS</div>
+            )
+          )}
+        </>
       )}
     </div>
   );

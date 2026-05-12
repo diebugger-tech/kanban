@@ -6,7 +6,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Mermaid from './Mermaid';
 
-export default function WikiPanel({ projekt, onClose, selectedWikiEntry }) {
+export default function WikiPanel({ projekt, onClose }) {
   const [activePage, setActivePage] = useState('doc');
   const [entries, setEntries] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
@@ -14,22 +14,6 @@ export default function WikiPanel({ projekt, onClose, selectedWikiEntry }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingEntry, setEditingEntry] = useState(null);
-
-  // Auto-switch page & scroll when opened from CommandPalette
-  useEffect(() => {
-    if (!selectedWikiEntry || entries.length === 0) return;
-    // Find the entry to determine which section to show
-    const target = entries.find(e => e.id?.toString() === selectedWikiEntry?.toString());
-    if (target?.typ && ['doc', 'bug', 'todo', 'system'].includes(target.typ)) {
-      setActivePage(target.typ);
-    }
-    // Give React one tick to re-render the correct section, then scroll
-    const id = setTimeout(() => {
-      const el = document.querySelector(`[data-wiki-id="${selectedWikiEntry}"]`);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 150);
-    return () => clearTimeout(id);
-  }, [selectedWikiEntry, entries]); // re-run when entries load
 
   const TEMPLATES = {
     architecture: {
@@ -304,15 +288,7 @@ export default function WikiPanel({ projekt, onClose, selectedWikiEntry }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {filtered.map(entry => (
-              <div
-                key={entry.id}
-                data-wiki-id={entry.id?.toString()}
-                style={
-                  selectedWikiEntry && entry.id?.toString() === selectedWikiEntry?.toString()
-                    ? styles.highlighted
-                    : styles.entry
-                }
-              >
+              <div key={entry.id} style={styles.entry}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(0, 255, 170, 0.1)', paddingBottom: '0.5rem' }}>
                   <h3 style={{ margin: 0, color: 'var(--accent-green)' }}>{entry.titel}</h3>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -432,15 +408,7 @@ export default function WikiPanel({ projekt, onClose, selectedWikiEntry }) {
     },
     entry: {
       padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)',
-      borderRadius: '4px',
-      transition: 'border-color 0.2s',
-    },
-    highlighted: {
-      padding: '1.5rem', backgroundColor: 'rgba(29,158,117,0.07)',
-      border: '1px solid var(--accent-green)',
-      borderRadius: '4px',
-      boxShadow: '0 0 12px rgba(29,158,117,0.18)',
-      transition: 'border-color 0.2s',
+      borderRadius: '4px'
     },
     searchInput: {
       width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-primary)',

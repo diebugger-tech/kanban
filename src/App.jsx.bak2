@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSurrealDB } from './hooks/useSurrealDB';
 import { useWikiStats } from './hooks/useWikiStats';
 import { COLUMNS } from './constants';
 import db from './lib/db';
-import Board from './components/Board';
+import KanbanColumn from './components/KanbanColumn';
 import DetailPanel from './components/DetailPanel';
 import Navbar from './components/Navbar';
 import WikiPanel from './components/WikiPanel';
@@ -25,7 +25,6 @@ export default function App() {
   const [showTodo, setShowTodo] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [selectedWikiEntry, setSelectedWikiEntry] = useState(null);
 
   // Single wiki live subscription via dedicated hook (fixes double-subscription bug)
   const wikiStats = useWikiStats((res) => logEvent(res.action, 'wiki', res.result));
@@ -100,14 +99,8 @@ export default function App() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  // openWikiEntry — called from CommandPalette when user clicks a wiki result
-  const openWikiEntry = useCallback((entry) => {
-    setSelectedWikiEntry(entry.id?.toString());
-    setShowWiki(true);
-    setShowCommandPalette(false);
-  }, []);
-
   const handleDragStart = (e, id) => e.dataTransfer.setData('text/plain', id);
+  const handleDragOver = (e) => e.preventDefault();
   const handleDrop = async (e, status) => {
     e.preventDefault();
     const id = e.dataTransfer.getData('text/plain');
@@ -148,15 +141,23 @@ export default function App() {
         onNotify={showToast}
       />
 
-      <Board
-        columns={COLUMNS}
-        projects={projects}
-        isLoading={isLoading}
-        onDragStart={handleDragStart}
-        onDrop={handleDrop}
-        onCardClick={(id) => setSelectedProjectId(id)}
-        wikiStats={wikiStats}
-      />
+      <main style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+        {COLUMNS.map(col => (
+          <KanbanColumn
+            key={col.id}
+            column={col}
+            projects={projects.filter(p => p.status === col.id)}
+            isLoading={isLoading}
+            onDragStart={handleDragStart}
+            onDragEnd={() => {}}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onCardClick={(id) => setSelectedProjectId(id)}
+            wikiStats={wikiStats}
+            allProjects={projects}
+          />
+        ))}
+      </main>
 
       <KaiAssistant project={selectedProject} />
 
@@ -166,11 +167,10 @@ export default function App() {
       
       <TerminalLog />
       {showCommandPalette && (
-        <CommandPalette
-          projects={projects}
-          onSelectProject={setSelectedProjectId}
+        <CommandPalette 
+          projects={projects} 
+          onSelectProject={setSelectedProjectId} 
           onClose={() => setShowCommandPalette(false)}
-          onOpenWikiEntry={openWikiEntry}
         />
       )}
       
@@ -184,10 +184,9 @@ export default function App() {
       />
 
       {showWiki && (
-        <WikiPanel
-          projekt={selectedProject}
-          onClose={() => { setShowWiki(false); setSelectedWikiEntry(null); }}
-          selectedWikiEntry={selectedWikiEntry}
+        <WikiPanel 
+          projekt={selectedProject} 
+          onClose={() => setShowWiki(false)} 
         />
       )}
       {showTodo && <TodoPanel onClose={() => setShowTodo(false)} />}

@@ -84,11 +84,10 @@ export default function KanbanCard({ project, onDragStart, onDragEnd, onClick, w
 
   return (
     <div
-      data-card
       style={styles.card}
       draggable
       onDragStart={(e) => {
-        onDragStart(e, project.id.toString());
+        e.dataTransfer.setData('text/plain', project.id.toString());
       }}
       onDragEnd={onDragEnd}
       onClick={() => onClick(project.id)}
