@@ -1,106 +1,164 @@
-# SurKAi
+# KAiOSS
+
+> AI-native project hub — Kanban, Wiki, Multi-Model KAi, powered by SurrealDB + React
 
 ![SurrealDB](https://img.shields.io/badge/SurrealDB-2.x-ff00a0?style=for-the-badge&logo=surrealdb)
 ![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite)
-![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![NixOS Compatible](https://img.shields.io/badge/NixOS-Compatible-5277C3?style=for-the-badge&logo=nixos)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)
 
-> **SurKAi v1.3** = **sur**real + **k**anban + **ai**
->
-> Zero-backend realtime Kanban board powered by SurrealDB 2.x & AI Assistant.
-
----
-
-## What's new in v1.3
-
-- **KAi Assistant** — AI-powered task generator with **Wiki Context Sync**. KAi understands your project architecture before suggesting tasks.
-- **Advanced Project Wiki** — Integrated documentation with **Mermaid.js** diagrams and **Prism** syntax highlighting.
-- **Architecture Templates** — One-click templates for **ADR** (Architectural Decision Records), **Setup**, and **Architecture** docs.
-- **System Dashboard** — Dynamic status monitor in the empty Backlog column (Global Pulse, DB Stats, KAi Health).
-- **Magnetic UX** — Todo-Panel with magnetic snap-points, position persistence, and double-click collapse.
-- **System Manifest** — Automatic project sidebar in Wiki showing Stack, Ports, and Entrypoints.
-- **SurrealDB 2.x Support** — Full compatibility with SurrealDB v2.x (Auth & Export headers).
-
-## Core Features
-
-- **Realtime** — SurrealDB LIVE SELECT for instant sync across all clients.
-- **Zero Backend** — Browser connects directly to SurrealDB via WebSocket. No middleware needed.
-- **Terminal Aesthetics** — High-end hacker dark theme with premium glassmorphism and animations.
-- **Drag & Drop** — Serialized RecordID handling for safe SurrealDB updates.
-- **Detail Panel** — Inline editing with CLI command copy-to-clipboard integration.
-- **NixOS Compatible** — Declarative development environments (nix-shell/flakes).
+```
+> kaioss --version 1.4.0
+> kaioss::ready
+```
 
 ---
 
-## Quick Start
+## Vision
 
-Works on any Linux, macOS, or Windows WSL2.
+KAiOSS ist mehr als ein Kanban-Tool.
 
-1. Install SurrealDB:
-   curl -sSf https://install.surrealdb.com | sh
+Die Idee: **Alle KI-Chats und Projektdaten gebündelt in einer einzigen SurrealDB** — lokal, privat, unter deiner Kontrolle.
 
-2. Clone and run:
-   git clone https://github.com/diebugger-tech/SurKAi
-   cd SurKAi
-   cp .env.example .env
-   npm install
-   surreal start --bind 127.0.0.1:8000 --user root --pass root surrealkv://./data &
-   npm run dev
+Claude, Gemini, Perplexity, OpenAI, Groq, Ollama — jedes Gespräch, jede Entscheidung, jeder Plan wird in deiner eigenen Datenbank gespeichert. KAiOSS wird zur zentralen Schaltzentrale für KI-gestütztes Arbeiten.
 
-3. Open http://localhost:5174
+```
+Claude ──┐
+Gemini ──┤
+Groq   ──┼──→ KAiOSS DB (SurrealDB) ──→ Projekte
+Ollama ──┤                               Wiki
+OpenAI ──┘                               Chat-History
+                                         TODOs
+```
 
-Edit .env:
-VITE_SURREAL_URL=ws://127.0.0.1:8000/rpc
+---
+
+## Kernprinzipien
+
+- **Lokal first** — alle Daten bleiben auf deinem Gerät
+- **Open Source** — Apache 2.0, Community-ready
+- **Model-agnostisch** — kein Lock-in auf einen Anbieter
+- **Privacy by Design** — API Keys nur in localStorage, nie in der DB
+- **SurrealDB** — eine DB für alles: Relationen, Live Queries, Realtime
+
+---
+
+## Stack
+
+| Layer | Technologie |
+|-------|-------------|
+| Frontend | React 18 + Vite 6 |
+| Datenbank | SurrealDB 2.x |
+| KAi Engine | Claude / Gemini / Groq / Ollama / OpenRouter |
+| Agent | Goose + OpenCode |
+| Styling | CSS Variables, Terminal-Ästhetik |
+
+---
+
+## Features
+
+### v1.3 — Stabil ✅
+- Kanban Board mit Drag & Drop
+- Wiki Panel (dynamisch aus SurrealDB)
+- TodoPanel mit Snap-Points
+- Backup Export (Terminal-Log)
+- Wiki Auto-Sync bei neuen Projekten
+- System-Manifest pro Projekt
+- TODO-Progress Kanban-Balken
+
+### v1.4 — Aktuell 🔄
+- Ghost Drop Indicator
+- Board.jsx Refactor (globaler dropTarget State)
+- KAi Wiki-Search in Cmd+K mit `[DOC]`/`[BUG]`/`[TODO]` Badges
+- KAi Fallback via Ollama wenn keine Wiki-Treffer
+- Obsidian Vault → SurrealDB Sync Button (File System Access API)
+- Auto-Save im DetailPanel (500ms Debounce)
+
+### v1.5 — Geplant 📋
+- Multi-Model KAi Hub (Claude, Gemini, Groq, Ollama)
+- Chat-History in SurrealDB
+- Remote DB Sync
+- Chat-History Import (Claude/Gemini JSON Export)
+- Ghost Drop zwischen Spalten (Cross-Column Reorder)
+- Suchbegriff-Highlighting im Wiki
+
+### v2.0 — Vision 🚀
+- Vollständiger KI-Hub
+- Zugriffskontrolle (`privat | team | öffentlich`)
+- Multi-User (Team-Modus)
+- Community Release
+- SurrealDB Showcase Einreichung
+
+---
+
+## Datenschutz & Zugriffskontrolle
+
+KAiOSS speichert **keine** API Keys in der Datenbank.
+
+```
+localStorage  → API Keys (nur lokal, nie übertragen)
+SurrealDB     → Chat-History, Wiki, Projekte, TODOs
+Remote Sync   → optional, explizit aktivierbar
+```
+
+Zugriffskontrolle (v2.0):
+- Jeder Chat-Eintrag hat einen `sichtbarkeit` Flag: `privat | team | öffentlich`
+- SurrealDB `DEFINE SCOPE` für User-basierte Zugriffskontrolle
+- Lokale Instanz = voller Zugriff, Remote = nur freigegebene Daten
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/diebugger-tech/surbanai
+cd surbanai
+npm install
+
+# SurrealDB starten (lokal)
+surreal start --log trace --user root --pass root memory
+
+# Dev Server
+npm run dev
+```
+
+### Umgebungsvariablen
+
+```env
+VITE_SURREAL_URL=http://127.0.0.1:8000/rpc
 VITE_SURREAL_USER=root
 VITE_SURREAL_PASS=root
 VITE_SURREAL_NS=kanban
 VITE_SURREAL_DB=projects
+```
 
-NixOS: nix-shell -p surrealdb nodejs
+### SurrealDB Schema
 
----
-
-## Makefile
-
-make help       Show available commands
-make dev        Start development server (port 5174)
-make stop       Stop dev server
-make db-start   Start SurrealDB locally
-make db-init    Initialize demo data
-make status     Show service status
+```sql
+USE NS kanban DB projects;
+-- Tabellen werden automatisch via db/init.surql angelegt
+```
 
 ---
 
-## Architecture
+## Entwickelt mit
 
-Browser (React) -> WebSocket -> SurrealDB -> LIVE SELECT (realtime push)
-
-No Express. No FastAPI. No proxy. SurrealDB IS the backend.
-
----
-
-## Database Management
-
-Surrealist (official GUI): https://surrealist.app
-
----
-
-## Integrations (coming soon)
-
-- Obsidian — sync #todo tags from vault notes to board cards
-- Hermes — bidirectional AI agent task sync
-- Pflanternen — NixOS automation diagnostics as cards
+```
+Planung       → Claude (Anthropic)
+Code          → Gemini 2.5 Flash (antigravity)
+Ausführung    → Goose + OpenCode
+Reasoning     → Qwen3 32B (Groq)
+```
 
 ---
 
 ## Contributing
 
-Contributions welcome! See CONTRIBUTING.md
-Open an issue: https://github.com/diebugger-tech/SurKAi/issues
+KAiOSS ist Open Source (Apache 2.0).
+Issues, PRs und Ideen sind willkommen.
+
+Lies [`MILESTONES.md`](./MILESTONES.md) für den aktuellen Entwicklungsstand.
 
 ---
 
-## License
-
-MIT © Andreas Bader 2026
+*KAiOSS — KAi Open Source System, powered by SurrealDB*
